@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { useAuth } from '../contexts/AuthContext';
 import { fetchTransactions, updateTransaction, deleteTransaction, type Transaction } from '../services/api';
 import { TransactionModal } from '../components/TransactionModal';
 import { useNavigate } from 'react-router-dom';
@@ -86,92 +85,92 @@ const TxAmount = styled.div<{ $type: 'income' | 'expense' }>`
 `;
 
 const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
 };
 
 const Templates: React.FC = () => {
-    const navigate = useNavigate();
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [isModalOpen, setModalOpen] = useState(false);
-    const [editingTemplate, setEditingTemplate] = useState<Transaction | null>(null);
+  const navigate = useNavigate();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<Transaction | null>(null);
 
-    useEffect(() => {
-        loadTransactions();
-    }, []);
+  useEffect(() => {
+    loadTransactions();
+  }, []);
 
-    const loadTransactions = async () => {
-        try {
-            const data = await fetchTransactions();
-            setTransactions(data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  const loadTransactions = async () => {
+    try {
+      const data = await fetchTransactions();
+      setTransactions(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const handleOpenModalForEdit = (tx: Transaction) => {
-        setEditingTemplate(tx);
-        setModalOpen(true);
-    };
+  const handleOpenModalForEdit = (tx: Transaction) => {
+    setEditingTemplate(tx);
+    setModalOpen(true);
+  };
 
-    const handleSaveTemplate = async (data: any) => {
-        try {
-            if (editingTemplate && editingTemplate.transactionId) {
-                await updateTransaction(editingTemplate.transactionId, data);
-                await loadTransactions();
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  const handleSaveTemplate = async (data: any) => {
+    try {
+      if (editingTemplate && editingTemplate.transactionId) {
+        await updateTransaction(editingTemplate.transactionId, data);
+        await loadTransactions();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const handleDeleteTemplate = async (id: string) => {
-        try {
-            await deleteTransaction(id);
-            await loadTransactions();
-            setModalOpen(false);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  const handleDeleteTemplate = async (id: string) => {
+    try {
+      await deleteTransaction(id);
+      await loadTransactions();
+      setModalOpen(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const activeTemplates = transactions.filter(t => (t.isTemplate || t.transactionId?.startsWith('TEMPLATE_')) && t.isActive !== false);
+  const activeTemplates = transactions.filter(t => (t.isTemplate || t.transactionId?.startsWith('TEMPLATE_')) && t.isActive !== false);
 
-    return (
-        <Container>
-            <Header>
-                <Title>Manage Templates</Title>
-                <HeaderActions>
-                    <Button onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
-                </HeaderActions>
-            </Header>
+  return (
+    <Container>
+      <Header>
+        <Title>Manage Templates</Title>
+        <HeaderActions>
+          <Button onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
+        </HeaderActions>
+      </Header>
 
-            <Title style={{ fontSize: '24px', marginBottom: '16px' }}>Your Recurring Templates</Title>
-            <TransactionList>
-                {activeTemplates.length === 0 && (
-                    <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>No active templates found</div>
-                )}
-                {activeTemplates.map((template, idx) => (
-                    <TransactionItem key={template.transactionId || idx} onClick={() => handleOpenModalForEdit(template)}>
-                        <TxLeft>
-                            <TxTitle>{template.category}</TxTitle>
-                            <TxSubtitle>Interval: {template.recurrenceInterval === 1 ? 'Monthly' : `Every ${template.recurrenceInterval} Months`} - {template.description}</TxSubtitle>
-                        </TxLeft>
-                        <TxAmount $type={template.type}>
-                            {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
-                        </TxAmount>
-                    </TransactionItem>
-                ))}
-            </TransactionList>
+      <Title style={{ fontSize: '24px', marginBottom: '16px' }}>Your Recurring Templates</Title>
+      <TransactionList>
+        {activeTemplates.length === 0 && (
+          <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>No active templates found</div>
+        )}
+        {activeTemplates.map((template, idx) => (
+          <TransactionItem key={template.transactionId || idx} onClick={() => handleOpenModalForEdit(template)}>
+            <TxLeft>
+              <TxTitle>{template.category}</TxTitle>
+              <TxSubtitle>Interval: {template.recurrenceInterval === 1 ? 'Monthly' : `Every ${template.recurrenceInterval} Months`} - {template.description}</TxSubtitle>
+            </TxLeft>
+            <TxAmount $type={template.type}>
+              {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
+            </TxAmount>
+          </TransactionItem>
+        ))}
+      </TransactionList>
 
-            <TransactionModal
-                isOpen={isModalOpen}
-                initialData={editingTemplate}
-                onClose={() => setModalOpen(false)}
-                onSubmit={handleSaveTemplate}
-                onDelete={handleDeleteTemplate}
-            />
-        </Container>
-    );
+      <TransactionModal
+        isOpen={isModalOpen}
+        initialData={editingTemplate}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleSaveTemplate}
+        onDelete={handleDeleteTemplate}
+      />
+    </Container>
+  );
 };
 
 export default Templates;

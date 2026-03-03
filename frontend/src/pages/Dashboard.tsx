@@ -4,6 +4,7 @@ import pastaLogo from '../assets/pastalogo.svg';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchTransactions, createTransaction, updateTransaction, deleteTransaction, type Transaction } from '../services/api';
 import { TransactionModal } from '../components/TransactionModal';
+import { NativeSelectRoot, NativeSelectField } from '../components/ui/native-select';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -18,24 +19,6 @@ const FilterContainer = styled.div`
   align-items: center;
 `;
 
-const Select = styled.select`
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: white;
-  font-size: 14px;
-  outline: none;
-  cursor: pointer;
-
-  &:focus {
-    background: rgba(255, 255, 255, 0.1);
-  }
-  
-  option {
-    background: #171717; /* Matches theme surface mostly */
-  }
-`;
 
 const Header = styled.header`
   display: flex;
@@ -258,7 +241,6 @@ const Dashboard: React.FC = () => {
   const expense = filteredTransactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const balance = income - expense;
 
-  const suggestedIncome = suggestedTemplates.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
   const suggestedExpense = suggestedTemplates.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const projectedExpenses = expense + suggestedExpense;
 
@@ -280,16 +262,20 @@ const Dashboard: React.FC = () => {
       </Header>
 
       <FilterContainer>
-        <Select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
-          {availableYears.map(year => (
-            <option key={year} value={year}>{year}</option>
-          ))}
-        </Select>
-        <Select value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))}>
-          {MONTHS.map((month, idx) => (
-            <option key={month} value={idx}>{month}</option>
-          ))}
-        </Select>
+        <NativeSelectRoot size="sm" width="120px">
+          <NativeSelectField value={selectedYear} onChange={(e: any) => setSelectedYear(Number(e.currentTarget.value))}>
+            {availableYears.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </NativeSelectField>
+        </NativeSelectRoot>
+        <NativeSelectRoot size="sm" width="160px">
+          <NativeSelectField value={selectedMonth} onChange={(e: any) => setSelectedMonth(Number(e.currentTarget.value))}>
+            {MONTHS.map((month, idx) => (
+              <option key={month} value={idx}>{month}</option>
+            ))}
+          </NativeSelectField>
+        </NativeSelectRoot>
       </FilterContainer>
 
       <CardsGrid>

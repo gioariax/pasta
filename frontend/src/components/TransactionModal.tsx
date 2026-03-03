@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { NativeSelectRoot, NativeSelectField } from './ui/native-select';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -51,16 +52,6 @@ const Form = styled.form`
   gap: ${({ theme }) => theme.spacing.md};
 `;
 
-const Select = styled.select`
-  width: 100%;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-size: 16px;
-  outline: none;
-`;
 
 const Input = styled.input`
   width: 100%;
@@ -194,10 +185,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
       <ModalContent>
         <Title>{initialData ? 'Edit Transaction' : 'Add Transaction'}</Title>
         <Form onSubmit={handleSubmit}>
-          <Select value={type} onChange={(e) => setType(e.target.value as any)}>
-            <option value="expense">Expense</option>
-            <option value="income">Income</option>
-          </Select>
+          <NativeSelectRoot>
+            <NativeSelectField value={type} onChange={(e: any) => setType(e.currentTarget.value as any)}>
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </NativeSelectField>
+          </NativeSelectRoot>
           <Input
             type="number"
             step="0.01"
@@ -206,11 +199,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             onChange={e => setAmount(e.target.value)}
             required
           />
-          <Select value={category} onChange={e => setCategory(e.target.value)} required>
-            {CATEGORIES[type].map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </Select>
+          <NativeSelectRoot>
+            <NativeSelectField value={category} onChange={(e: any) => setCategory(e.currentTarget.value)}>
+              {CATEGORIES[type].map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </NativeSelectField>
+          </NativeSelectRoot>
           <Input
             type="text"
             placeholder="Description..."
@@ -240,11 +235,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
           )}
 
           {(isRecurring || initialData?.isTemplate) && (
-            <Select value={recurrenceInterval} onChange={e => setRecurrenceInterval(Number(e.target.value))}>
-              <option value={1}>Monthly</option>
-              <option value={2}>Every 2 Months</option>
-              <option value={3}>Every 3 Months</option>
-            </Select>
+            <NativeSelectRoot>
+              <NativeSelectField value={recurrenceInterval} onChange={(e: any) => setRecurrenceInterval(Number(e.currentTarget.value))}>
+                <option value={1}>Monthly</option>
+                <option value={2}>Every 2 Months</option>
+                <option value={3}>Every 3 Months</option>
+              </NativeSelectField>
+            </NativeSelectRoot>
           )}
           <Row>
             {initialData && initialData.transactionId && onDelete && (

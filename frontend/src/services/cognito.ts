@@ -54,9 +54,14 @@ export const signIn = (email: string, password: string): Promise<any> => {
         const cognitoUser = new CognitoUser(userData);
 
         cognitoUser.authenticateUser(authenticationDetails, {
-            onSuccess: (result) => resolve({ status: 'SUCCESS', result }),
-            onFailure: (err) => reject(err),
-            newPasswordRequired: (userAttributes, requiredAttributes) => {
+            onSuccess: (session) => {
+                resolve(session);
+            },
+            onFailure: (err) => {
+                reject(err);
+            },
+            newPasswordRequired: (userAttributes) => {
+                // User was created by an admin and needs to choose a new password
                 resolve({
                     status: 'NEW_PASSWORD_REQUIRED',
                     cognitoUser,
