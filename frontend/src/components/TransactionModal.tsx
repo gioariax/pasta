@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { NativeSelectRoot, NativeSelectField } from './ui/native-select';
 import { NumberInputRoot, NumberInputField } from './ui/number-input';
-import { Input } from '@chakra-ui/react';
+import { Input, parseDate } from '@chakra-ui/react';
 import { Switch } from './ui/switch';
+import { DatePickerRoot, DatePickerControl, DatePickerInput } from './ui/date-picker';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -186,14 +187,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             value={description}
             onChange={e => setDescription(e.target.value)}
           />
-          <Input
-            type="date"
-            variant="outline"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-            required
-            title="Transaction Date"
-          />
+          <DatePickerRoot
+            value={date ? [parseDate(date)] : []}
+            onValueChange={(e) => setDate(e.value[0]?.toString() ?? new Date().toISOString().split('T')[0])}
+            width="full"
+          >
+            <DatePickerControl>
+              <DatePickerInput placeholder="Select date" />
+            </DatePickerControl>
+          </DatePickerRoot>
 
           {!initialData?.isTemplate && (
             <Switch
