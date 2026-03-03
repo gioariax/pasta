@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import pastaLogo from '../assets/pastalogo.svg';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchTransactions, createTransaction, updateTransaction, deleteTransaction, type Transaction } from '../services/api';
 import { TransactionModal } from '../components/TransactionModal';
@@ -46,6 +47,9 @@ const Header = styled.header`
 const Title = styled.h1`
   font-size: 32px;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 `;
 
 const HeaderActions = styled.div`
@@ -227,7 +231,10 @@ const Dashboard: React.FC = () => {
   return (
     <Container>
       <Header>
-        <Title>Overview</Title>
+        <Title>
+          <img src={pastaLogo} alt="Pasta Logo" style={{ height: '32px' }} />
+          Overview
+        </Title>
         <HeaderActions>
           <Button $primary onClick={handleOpenModalForCreate}>+ Add Transaction</Button>
           <Button onClick={logout}>Sign Out</Button>

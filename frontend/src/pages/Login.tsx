@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import pastaLogo from '../assets/pastalogo.svg';
 import { signIn, completeNewPassword } from '../services/cognito';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -134,6 +135,9 @@ const Login: React.FC = () => {
   return (
     <Container>
       <Card>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <img src={pastaLogo} alt="Pasta Logo" style={{ height: '40px' }} />
+        </div>
         <Title>{isNewPasswordRequired ? 'Set New Password' : 'Welcome Back'}</Title>
 
         {isNewPasswordRequired ? (
