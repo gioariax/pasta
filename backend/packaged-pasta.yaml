@@ -91,7 +91,7 @@ Resources:
   GetTransactionsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/9af7dc5535c11a1254828b69416eab57
+      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/3359675ad409479a16904d66c0459a21
       Handler: transactions.getTransactions
       Policies:
       - DynamoDBReadPolicy:
@@ -108,7 +108,7 @@ Resources:
   CreateTransactionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/9af7dc5535c11a1254828b69416eab57
+      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/3359675ad409479a16904d66c0459a21
       Handler: transactions.createTransaction
       Policies:
       - DynamoDBWritePolicy:
@@ -125,7 +125,7 @@ Resources:
   UpdateTransactionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/9af7dc5535c11a1254828b69416eab57
+      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/3359675ad409479a16904d66c0459a21
       Handler: transactions.updateTransaction
       Policies:
       - DynamoDBWritePolicy:
@@ -142,7 +142,7 @@ Resources:
   DeleteTransactionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/9af7dc5535c11a1254828b69416eab57
+      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/3359675ad409479a16904d66c0459a21
       Handler: transactions.deleteTransaction
       Policies:
       - DynamoDBCrudPolicy:

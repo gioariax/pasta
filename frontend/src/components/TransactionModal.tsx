@@ -73,6 +73,26 @@ const Input = styled.input`
   outline: none;
 `;
 
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+`;
+
+const CheckboxInput = styled.input`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: ${({ theme }) => theme.colors.primary};
+`;
+
+const CheckboxLabel = styled.label`
+  font-size: 14px;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  cursor: pointer;
+`;
+
 const Row = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing.md};
@@ -112,6 +132,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState(CATEGORIES.expense[0]);
   const [description, setDescription] = useState('');
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceInterval, setRecurrenceInterval] = useState(1);
 
   // Pre-populate fields on open
   React.useEffect(() => {
@@ -121,11 +145,17 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
       // Need a tiny timeout so category updates after type change if necessary
       setTimeout(() => setCategory(initialData.category), 0);
       setDescription(initialData.description || '');
+      setDate(new Date(initialData.date).toISOString().split('T')[0]);
+      setIsRecurring(!!initialData.isRecurring || !!initialData.isTemplate);
+      setRecurrenceInterval(initialData.recurrenceInterval || 1);
     } else if (isOpen && !initialData) {
       setType('expense');
       setAmount('');
       setCategory(CATEGORIES.expense[0]);
       setDescription('');
+      setDate(new Date().toISOString().split('T')[0]);
+      setIsRecurring(false);
+      setRecurrenceInterval(1);
     }
   }, [isOpen, initialData]);
 
@@ -146,11 +176,16 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
       amount: parseFloat(amount),
       category,
       description,
-      date: initialData?.date || new Date().toISOString() // Preserve original date if editing
+      date: new Date(date).toISOString(), // Use custom UI date instead
+      isRecurring,
+      recurrenceInterval: isRecurring ? recurrenceInterval : undefined
     });
     setAmount('');
     setCategory(CATEGORIES[type][0]);
     setDescription('');
+    setDate(new Date().toISOString().split('T')[0]);
+    setIsRecurring(false);
+    setRecurrenceInterval(1);
     onClose();
   };
 
@@ -182,6 +217,35 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             value={description}
             onChange={e => setDescription(e.target.value)}
           />
+          <Input
+            type="date"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            required
+            title="Transaction Date"
+          />
+
+          {!initialData?.isTemplate && (
+            <CheckboxContainer>
+              <CheckboxInput
+                type="checkbox"
+                id="recurring-check"
+                checked={isRecurring}
+                onChange={(e) => setIsRecurring(e.target.checked)}
+              />
+              <CheckboxLabel htmlFor="recurring-check">
+                Make this a recurring transaction
+              </CheckboxLabel>
+            </CheckboxContainer>
+          )}
+
+          {(isRecurring || initialData?.isTemplate) && (
+            <Select value={recurrenceInterval} onChange={e => setRecurrenceInterval(Number(e.target.value))}>
+              <option value={1}>Monthly</option>
+              <option value={2}>Every 2 Months</option>
+              <option value={3}>Every 3 Months</option>
+            </Select>
+          )}
           <Row>
             {initialData && initialData.transactionId && onDelete && (
               <DeleteButton type="button" onClick={() => {

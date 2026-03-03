@@ -9,6 +9,11 @@ export interface Transaction {
     category: string;
     description: string;
     date: string;
+    isRecurring?: boolean;
+    recurrenceInterval?: number; // 1, 2, or 3 months
+    recurrenceId?: string;
+    isTemplate?: boolean;
+    isActive?: boolean;
 }
 
 const getHeaders = async () => {

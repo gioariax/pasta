@@ -49,17 +49,49 @@ export const createTransaction = async (event: APIGatewayProxyEvent): Promise<AP
         }
 
         const data = JSON.parse(event.body);
+
+        const isRecurring = data.isRecurring === true;
+        let recurrenceId = data.recurrenceId;
+        const dateStr = data.date || new Date().toISOString();
+
+        // If the user requested to make this a new recurring template
+        if (isRecurring && !recurrenceId) {
+            recurrenceId = 'TEMPLATE_' + uuidv4();
+
+            const templateItem = {
+                userId,
+                transactionId: recurrenceId,
+                amount: data.amount,
+                type: data.type,
+                category: data.category,
+                description: data.description,
+                date: dateStr, // This acts as recurrenceStartDate
+                isTemplate: true,
+                isActive: true,
+                recurrenceInterval: data.recurrenceInterval || 1,
+            };
+
+            await docClient.send(new PutCommand({
+                TableName: TABLE_NAME,
+                Item: templateItem,
+            }));
+        }
+
         const transactionId = new Date().toISOString() + '_' + uuidv4();
 
-        const item = {
+        const item: any = {
             userId,
             transactionId,
             amount: data.amount,
             type: data.type, // 'income' or 'expense'
             category: data.category,
             description: data.description,
-            date: data.date || new Date().toISOString(),
+            date: dateStr,
         };
+
+        if (recurrenceId) {
+            item.recurrenceId = recurrenceId;
+        }
 
         await docClient.send(new PutCommand({
             TableName: TABLE_NAME,
@@ -84,15 +116,50 @@ export const updateTransaction = async (event: APIGatewayProxyEvent): Promise<AP
 
         const data = JSON.parse(event.body);
 
-        const item = {
+        let recurrenceId = data.recurrenceId;
+        const dateStr = data.date;
+
+        // Optionally, if they edit a transaction and turn ON recurring for the first time
+        if (data.isRecurring && !recurrenceId && !transactionId.startsWith('TEMPLATE_')) {
+            recurrenceId = 'TEMPLATE_' + uuidv4();
+            const templateItem = {
+                userId,
+                transactionId: recurrenceId,
+                amount: data.amount,
+                type: data.type,
+                category: data.category,
+                description: data.description,
+                date: dateStr || new Date().toISOString(),
+                isTemplate: true,
+                isActive: true,
+                recurrenceInterval: data.recurrenceInterval || 1,
+            };
+            await docClient.send(new PutCommand({
+                TableName: TABLE_NAME,
+                Item: templateItem,
+            }));
+        }
+
+        const item: any = {
             userId,
             transactionId,
             amount: data.amount,
             type: data.type,
             category: data.category,
             description: data.description,
-            date: data.date,
+            date: dateStr,
         };
+
+        if (recurrenceId) {
+            item.recurrenceId = recurrenceId;
+        }
+
+        // If editing an actual template directly
+        if (transactionId.startsWith('TEMPLATE_')) {
+            item.isTemplate = true;
+            item.isActive = data.isActive !== undefined ? data.isActive : true;
+            item.recurrenceInterval = data.recurrenceInterval || 1;
+        }
 
         await docClient.send(new PutCommand({
             TableName: TABLE_NAME,

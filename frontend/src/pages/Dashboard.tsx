@@ -192,15 +192,12 @@ const Dashboard: React.FC = () => {
     try {
       if (editingTransaction && editingTransaction.transactionId) {
         // Update
-        const updated = await updateTransaction(editingTransaction.transactionId, data);
-        setTransactions(transactions.map(t =>
-          t.transactionId === editingTransaction.transactionId ? updated : t
-        ));
+        await updateTransaction(editingTransaction.transactionId, data);
       } else {
         // Create
-        const saved = await createTransaction(data);
-        setTransactions([saved, ...transactions]);
+        await createTransaction(data);
       }
+      await loadTransactions(); // Refresh everything to get implicitly created templates
     } catch (err) {
       console.error(err);
     }
@@ -209,21 +206,61 @@ const Dashboard: React.FC = () => {
   const handleDeleteTransaction = async (id: string) => {
     try {
       await deleteTransaction(id);
-      setTransactions(transactions.filter(t => t.transactionId !== id));
+      await loadTransactions();
       setModalOpen(false);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const filteredTransactions = transactions.filter(tx => {
+  const normalTransactions = transactions.filter(t => !t.isTemplate && !t.transactionId?.startsWith('TEMPLATE_'));
+  const activeTemplates = transactions.filter(t => (t.isTemplate || t.transactionId?.startsWith('TEMPLATE_')) && t.isActive !== false);
+
+  const filteredTransactions = normalTransactions.filter(tx => {
     const txDate = new Date(tx.date);
     return txDate.getMonth() === selectedMonth && txDate.getFullYear() === selectedYear;
   });
 
+  // Suggestion Engine
+  const suggestedTemplates = activeTemplates.filter(template => {
+    if (!template.date) return false;
+    const tDate = new Date(template.date);
+    const monthsDifference = (selectedYear - tDate.getFullYear()) * 12 + (selectedMonth - tDate.getMonth());
+
+    // Check if interval matches and it's not in the future
+    const interval = template.recurrenceInterval || 1;
+    if (monthsDifference >= 0 && monthsDifference % interval === 0) {
+      // Check if already paid this month
+      const alreadyPaid = filteredTransactions.some(tx => tx.recurrenceId === template.transactionId);
+      return !alreadyPaid;
+    }
+    return false;
+  });
+
+  const handleAcceptSuggestion = async (template: Transaction) => {
+    try {
+      const newTx = {
+        amount: template.amount,
+        category: template.category,
+        description: template.description || 'Recurring Transaction',
+        type: template.type,
+        date: new Date(selectedYear, selectedMonth, new Date().getDate()).toISOString(),
+        recurrenceId: template.transactionId,
+      };
+      await createTransaction(newTx);
+      await loadTransactions();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const income = filteredTransactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
   const expense = filteredTransactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const balance = income - expense;
+
+  const suggestedIncome = suggestedTemplates.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
+  const suggestedExpense = suggestedTemplates.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
+  const projectedExpenses = expense + suggestedExpense;
 
   const currentYearNum = currentDate.getFullYear();
   const availableYears = [currentYearNum - 2, currentYearNum - 1, currentYearNum, currentYearNum + 1, currentYearNum + 2];
@@ -236,6 +273,7 @@ const Dashboard: React.FC = () => {
           Overview
         </Title>
         <HeaderActions>
+          <Button onClick={() => window.location.href = '/templates'}>Manage Templates</Button>
           <Button $primary onClick={handleOpenModalForCreate}>+ Add Transaction</Button>
           <Button onClick={logout}>Sign Out</Button>
         </HeaderActions>
@@ -258,6 +296,10 @@ const Dashboard: React.FC = () => {
         <SummaryCard>
           <CardLabel>Current Balance</CardLabel>
           <CardValue>{formatCurrency(balance)}</CardValue>
+        </SummaryCard>
+        <SummaryCard style={suggestedTemplates.filter(t => t.type === 'expense').length > 0 ? { border: '1px solid rgba(59, 130, 246, 0.3)' } : {}}>
+          <CardLabel>Projected Expenses</CardLabel>
+          <CardValue $type="expense">-{formatCurrency(projectedExpenses)}</CardValue>
         </SummaryCard>
         <SummaryCard>
           <CardLabel>Total Income</CardLabel>
@@ -286,6 +328,28 @@ const Dashboard: React.FC = () => {
           </TransactionItem>
         ))}
       </TransactionList>
+
+      {suggestedTemplates.length > 0 && (
+        <>
+          <Title style={{ fontSize: '24px', margin: '32px 0 16px' }}>Suggested Actions</Title>
+          <TransactionList>
+            {suggestedTemplates.map((template, idx) => (
+              <TransactionItem key={template.transactionId || idx} style={{ borderLeft: '4px solid #3b82f6', background: 'rgba(59, 130, 246, 0.05)' }}>
+                <TxLeft>
+                  <TxTitle>{template.category}</TxTitle>
+                  <TxSubtitle>Recurring {template.recurrenceInterval === 1 ? 'Monthly' : `Every ${template.recurrenceInterval} Months`} - {template.description}</TxSubtitle>
+                </TxLeft>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <TxAmount $type={template.type}>
+                    {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
+                  </TxAmount>
+                  <Button $primary onClick={(e) => { e.stopPropagation(); handleAcceptSuggestion(template); }}>Accept</Button>
+                </div>
+              </TransactionItem>
+            ))}
+          </TransactionList>
+        </>
+      )}
 
       <TransactionModal
         isOpen={isModalOpen}
