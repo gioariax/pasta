@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { NativeSelectRoot, NativeSelectField } from './ui/native-select';
 import { NumberInputRoot, NumberInputField } from './ui/number-input';
-import { Input, parseDate } from '@chakra-ui/react';
+import { Input, parseDate, createListCollection } from '@chakra-ui/react';
+import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from './ui/select';
+import { SegmentedControl } from './ui/segmented-control';
 import { Switch } from './ui/switch';
 import { DatePickerRoot, DatePickerControl, DatePickerInput } from './ui/date-picker';
 
@@ -18,6 +19,14 @@ const CATEGORIES = {
   expense: ['Housing', 'Food & Groceries', 'Utilities', 'Transportation', 'Entertainment', 'Health', 'Shopping', 'Other'],
   income: ['Salary', 'Freelance', 'Investments', 'Gifts', 'Other']
 };
+
+const recurrenceCollection = createListCollection({
+  items: [
+    { label: 'Monthly', value: '1' },
+    { label: 'Every 2 Months', value: '2' },
+    { label: 'Every 3 Months', value: '3' }
+  ]
+});
 
 const Overlay = styled.div`
   position: fixed;
@@ -158,12 +167,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
       <ModalContent>
         <Title>{initialData ? 'Edit Transaction' : 'Add Transaction'}</Title>
         <Form onSubmit={handleSubmit}>
-          <NativeSelectRoot>
-            <NativeSelectField value={type} onChange={(e: any) => setType(e.currentTarget.value as any)}>
-              <option value="expense">Expense</option>
-              <option value="income">Income</option>
-            </NativeSelectField>
-          </NativeSelectRoot>
+          <SegmentedControl
+            name="type"
+            value={type}
+            onValueChange={(e) => setType(e.value as 'income' | 'expense')}
+            items={[
+              { label: 'Expense', value: 'expense' },
+              { label: 'Income', value: 'income' }
+            ]}
+          />
           <NumberInputRoot
             value={amount}
             onValueChange={(e) => setAmount(e.value)}
@@ -174,13 +186,26 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
           >
             <NumberInputField placeholder="Amount" />
           </NumberInputRoot>
-          <NativeSelectRoot>
-            <NativeSelectField value={category} onChange={(e: any) => setCategory(e.currentTarget.value)}>
+          <SelectRoot
+            collection={createListCollection({
+              items: CATEGORIES[type].map(c => ({ label: c, value: c }))
+            })}
+            value={[category]}
+            onValueChange={(e) => setCategory(e.value[0])}
+            variant="outline"
+            width="full"
+          >
+            <SelectTrigger>
+              <SelectValueText placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
               {CATEGORIES[type].map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+                <SelectItem item={{ label: cat, value: cat }} key={cat}>
+                  {cat}
+                </SelectItem>
               ))}
-            </NativeSelectField>
-          </NativeSelectRoot>
+            </SelectContent>
+          </SelectRoot>
           <Input
             variant="outline"
             placeholder="Description..."
@@ -208,13 +233,23 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
           )}
 
           {(isRecurring || initialData?.isTemplate) && (
-            <NativeSelectRoot>
-              <NativeSelectField value={recurrenceInterval} onChange={(e: any) => setRecurrenceInterval(Number(e.currentTarget.value))}>
-                <option value={1}>Monthly</option>
-                <option value={2}>Every 2 Months</option>
-                <option value={3}>Every 3 Months</option>
-              </NativeSelectField>
-            </NativeSelectRoot>
+            <SelectRoot
+              collection={recurrenceCollection}
+              value={[String(recurrenceInterval)]}
+              onValueChange={(e) => setRecurrenceInterval(Number(e.value[0]))}
+              variant="outline"
+            >
+              <SelectTrigger>
+                <SelectValueText placeholder="Select interval" />
+              </SelectTrigger>
+              <SelectContent>
+                {recurrenceCollection.items.map((item) => (
+                  <SelectItem item={item} key={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectRoot>
           )}
           <Row>
             {initialData && initialData.transactionId && onDelete && (

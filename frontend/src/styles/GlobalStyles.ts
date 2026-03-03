@@ -14,12 +14,6 @@ export const GlobalStyles = createGlobalStyle`
   button {
     font-family: inherit;
     cursor: pointer;
-    border: none;
-    outline: none;
-  }
-
-  input, select, textarea {
-    font-family: inherit;
   }
 
   a {

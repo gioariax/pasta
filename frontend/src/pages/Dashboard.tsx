@@ -4,7 +4,8 @@ import pastaLogo from '../assets/pastalogo.svg';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchTransactions, createTransaction, updateTransaction, deleteTransaction, type Transaction } from '../services/api';
 import { TransactionModal } from '../components/TransactionModal';
-import { NativeSelectRoot, NativeSelectField } from '../components/ui/native-select';
+import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from '../components/ui/select';
+import { createListCollection } from '@chakra-ui/react';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -137,6 +138,10 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
+const monthCollection = createListCollection({
+  items: MONTHS.map((m, idx) => ({ label: m, value: String(idx) }))
+});
+
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -262,12 +267,15 @@ const Dashboard: React.FC = () => {
   const currentYearNum = currentDate.getFullYear();
   const availableYears = [currentYearNum - 2, currentYearNum - 1, currentYearNum, currentYearNum + 1, currentYearNum + 2];
 
+  const yearCollection = createListCollection({
+    items: availableYears.map(y => ({ label: String(y), value: String(y) }))
+  });
+
   return (
     <Container>
       <Header>
         <Title>
           <img src={pastaLogo} alt="Pasta Logo" style={{ height: '32px' }} />
-          Overview
         </Title>
         <HeaderActions>
           <Button onClick={() => window.location.href = '/templates'}>Manage Templates</Button>
@@ -277,20 +285,45 @@ const Dashboard: React.FC = () => {
       </Header>
 
       <FilterContainer>
-        <NativeSelectRoot size="sm" width="120px">
-          <NativeSelectField value={selectedYear} onChange={(e: any) => setSelectedYear(Number(e.currentTarget.value))}>
-            {availableYears.map(year => (
-              <option key={year} value={year}>{year}</option>
+        <SelectRoot
+          size="sm"
+          width="120px"
+          collection={yearCollection}
+          value={[String(selectedYear)]}
+          onValueChange={(e) => setSelectedYear(Number(e.value[0]))}
+          variant="outline"
+        >
+          <SelectTrigger>
+            <SelectValueText placeholder="Year" />
+          </SelectTrigger>
+          <SelectContent>
+            {yearCollection.items.map((item) => (
+              <SelectItem item={item} key={item.value}>
+                {item.label}
+              </SelectItem>
             ))}
-          </NativeSelectField>
-        </NativeSelectRoot>
-        <NativeSelectRoot size="sm" width="160px">
-          <NativeSelectField value={selectedMonth} onChange={(e: any) => setSelectedMonth(Number(e.currentTarget.value))}>
-            {MONTHS.map((month, idx) => (
-              <option key={month} value={idx}>{month}</option>
+          </SelectContent>
+        </SelectRoot>
+
+        <SelectRoot
+          size="sm"
+          width="160px"
+          collection={monthCollection}
+          value={[String(selectedMonth)]}
+          onValueChange={(e) => setSelectedMonth(Number(e.value[0]))}
+          variant="outline"
+        >
+          <SelectTrigger>
+            <SelectValueText placeholder="Month" />
+          </SelectTrigger>
+          <SelectContent>
+            {monthCollection.items.map((item) => (
+              <SelectItem item={item} key={item.value}>
+                {item.label}
+              </SelectItem>
             ))}
-          </NativeSelectField>
-        </NativeSelectRoot>
+          </SelectContent>
+        </SelectRoot>
       </FilterContainer>
 
       <CardsGrid>
