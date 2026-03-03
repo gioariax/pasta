@@ -1,0 +1,26 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild src/handlers/transactions.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/handlers/transactions.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.161",
+    "@types/node": "^25.3.3",
+    "@types/uuid": "^10.0.0",
+    "esbuild": "^0.27.3",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1000.0",
+    "@aws-sdk/lib-dynamodb": "^3.1000.0",
+    "uuid": "^13.0.0"
+  }
+}
