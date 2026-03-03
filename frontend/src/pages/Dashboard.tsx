@@ -141,6 +141,7 @@ const Dashboard: React.FC = () => {
   const { logout } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [acceptingTemplates, setAcceptingTemplates] = useState<Set<string>>(new Set());
 
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState<number>(currentDate.getMonth());
@@ -221,6 +222,14 @@ const Dashboard: React.FC = () => {
   });
 
   const handleAcceptSuggestion = async (template: Transaction) => {
+    if (!template.transactionId || acceptingTemplates.has(template.transactionId)) return;
+
+    setAcceptingTemplates(prev => {
+      const newSet = new Set(prev);
+      newSet.add(template.transactionId!);
+      return newSet;
+    });
+
     try {
       const newTx = {
         amount: template.amount,
@@ -234,6 +243,12 @@ const Dashboard: React.FC = () => {
       await loadTransactions();
     } catch (err) {
       console.error(err);
+    } finally {
+      setAcceptingTemplates(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(template.transactionId!);
+        return newSet;
+      });
     }
   };
 
@@ -329,7 +344,14 @@ const Dashboard: React.FC = () => {
                   <TxAmount $type={template.type}>
                     {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
                   </TxAmount>
-                  <Button $primary onClick={(e) => { e.stopPropagation(); handleAcceptSuggestion(template); }}>Accept</Button>
+                  <Button
+                    $primary
+                    disabled={acceptingTemplates.has(template.transactionId!)}
+                    style={{ opacity: acceptingTemplates.has(template.transactionId!) ? 0.5 : 1, cursor: acceptingTemplates.has(template.transactionId!) ? 'not-allowed' : 'pointer' }}
+                    onClick={(e) => { e.stopPropagation(); handleAcceptSuggestion(template); }}
+                  >
+                    {acceptingTemplates.has(template.transactionId!) ? 'Accepting...' : 'Accept'}
+                  </Button>
                 </div>
               </TransactionItem>
             ))}

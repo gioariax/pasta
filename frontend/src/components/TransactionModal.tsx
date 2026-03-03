@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { NativeSelectRoot, NativeSelectField } from './ui/native-select';
+import { NumberInputRoot, NumberInputField } from './ui/number-input';
+import { Input } from '@chakra-ui/react';
+import { Switch } from './ui/switch';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -52,37 +55,6 @@ const Form = styled.form`
   gap: ${({ theme }) => theme.spacing.md};
 `;
 
-
-const Input = styled.input`
-  width: 100%;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-size: 16px;
-  outline: none;
-`;
-
-const CheckboxContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 4px;
-`;
-
-const CheckboxInput = styled.input`
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: ${({ theme }) => theme.colors.primary};
-`;
-
-const CheckboxLabel = styled.label`
-  font-size: 14px;
-  color: ${({ theme }) => theme.colors.textPrimary};
-  cursor: pointer;
-`;
 
 const Row = styled.div`
   display: flex;
@@ -191,14 +163,16 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
               <option value="income">Income</option>
             </NativeSelectField>
           </NativeSelectRoot>
-          <Input
-            type="number"
-            step="0.01"
-            placeholder="Amount"
+          <NumberInputRoot
             value={amount}
-            onChange={e => setAmount(e.target.value)}
+            onValueChange={(e) => setAmount(e.value)}
+            step={0.01}
+            min={0}
             required
-          />
+            width="full"
+          >
+            <NumberInputField placeholder="Amount" />
+          </NumberInputRoot>
           <NativeSelectRoot>
             <NativeSelectField value={category} onChange={(e: any) => setCategory(e.currentTarget.value)}>
               {CATEGORIES[type].map(cat => (
@@ -207,13 +181,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             </NativeSelectField>
           </NativeSelectRoot>
           <Input
-            type="text"
+            variant="outline"
             placeholder="Description..."
             value={description}
             onChange={e => setDescription(e.target.value)}
           />
           <Input
             type="date"
+            variant="outline"
             value={date}
             onChange={e => setDate(e.target.value)}
             required
@@ -221,17 +196,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
           />
 
           {!initialData?.isTemplate && (
-            <CheckboxContainer>
-              <CheckboxInput
-                type="checkbox"
-                id="recurring-check"
-                checked={isRecurring}
-                onChange={(e) => setIsRecurring(e.target.checked)}
-              />
-              <CheckboxLabel htmlFor="recurring-check">
-                Make this a recurring transaction
-              </CheckboxLabel>
-            </CheckboxContainer>
+            <Switch
+              colorPalette="blue"
+              checked={isRecurring}
+              onCheckedChange={(e) => setIsRecurring(e.checked)}
+            >
+              Make this a recurring transaction
+            </Switch>
           )}
 
           {(isRecurring || initialData?.isTemplate) && (
