@@ -16,6 +16,18 @@ export interface Transaction {
     isActive?: boolean;
 }
 
+export interface Category {
+    id: string;
+    name: string;
+    type: 'income' | 'expense';
+    icon: string;
+}
+
+export interface UserSettings {
+    categories: Category[];
+}
+
+
 const getHeaders = async () => {
     const token = await getCurrentUserToken();
     return {
@@ -83,4 +95,32 @@ export const deleteTransaction = async (id: string): Promise<void> => {
     });
 
     if (!response.ok) throw new Error('Failed to delete transaction');
+};
+
+export const fetchSettings = async (): Promise<UserSettings> => {
+    if (API_URL === 'http://localhost:3001') {
+        return { categories: [] };
+    }
+
+    const response = await fetch(`${API_URL}/settings`, {
+        headers: await getHeaders(),
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch settings');
+    return response.json();
+};
+
+export const updateSettings = async (settings: UserSettings): Promise<UserSettings> => {
+    if (API_URL === 'http://localhost:3001') {
+        return settings;
+    }
+
+    const response = await fetch(`${API_URL}/settings`, {
+        method: 'PUT',
+        headers: await getHeaders(),
+        body: JSON.stringify(settings),
+    });
+
+    if (!response.ok) throw new Error('Failed to update settings');
+    return response.json();
 };

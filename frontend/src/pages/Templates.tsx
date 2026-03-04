@@ -88,7 +88,11 @@ const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
 };
 
-const Templates: React.FC = () => {
+interface TemplatesProps {
+  hideHeader?: boolean;
+}
+
+const Templates: React.FC<TemplatesProps> = ({ hideHeader }) => {
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -136,15 +140,19 @@ const Templates: React.FC = () => {
   const activeTemplates = transactions.filter(t => (t.isTemplate || t.transactionId?.startsWith('TEMPLATE_')) && t.isActive !== false);
 
   return (
-    <Container>
-      <Header>
-        <Title>Manage Templates</Title>
-        <HeaderActions>
-          <Button onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
-        </HeaderActions>
-      </Header>
+    <Container style={{ padding: hideHeader ? 0 : undefined }}>
+      {!hideHeader && (
+        <Header>
+          <Title>Manage Templates</Title>
+          <HeaderActions>
+            <Button onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
+          </HeaderActions>
+        </Header>
+      )}
 
-      <Title style={{ fontSize: '24px', marginBottom: '16px' }}>Your Recurring Templates</Title>
+      {/* Conditionally hide the secondary title if embedded */}
+      {!hideHeader && <Title style={{ fontSize: '24px', marginBottom: '16px' }}>Your Recurring Templates</Title>}
+
       <TransactionList>
         {activeTemplates.length === 0 && (
           <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>No active templates found</div>

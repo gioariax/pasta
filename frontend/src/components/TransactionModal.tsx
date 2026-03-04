@@ -15,10 +15,7 @@ interface TransactionModalProps {
   initialData?: any;
 }
 
-const CATEGORIES = {
-  expense: ['Housing', 'Food & Groceries', 'Utilities', 'Transportation', 'Entertainment', 'Health', 'Shopping', 'Other'],
-  income: ['Salary', 'Freelance', 'Investments', 'Gifts', 'Other']
-};
+import { useSettings } from '../contexts/SettingsContext';
 
 const recurrenceCollection = createListCollection({
   items: [
@@ -101,9 +98,14 @@ const DeleteButton = styled(Button)`
 `;
 
 export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, initialData, onSubmit, onDelete }) => {
+  const { categories: allCategories } = useSettings();
   const [type, setType] = useState<'income' | 'expense'>('expense');
+
+  const currentCategories = allCategories.filter(c => c.type === type).map(c => c.name);
+  const defaultCategory = currentCategories.length > 0 ? currentCategories[0] : '';
+
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState(CATEGORIES.expense[0]);
+  const [category, setCategory] = useState(defaultCategory);
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
 
@@ -124,7 +126,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
     } else if (isOpen && !initialData) {
       setType('expense');
       setAmount('');
-      setCategory(CATEGORIES.expense[0]);
+      const expenses = allCategories.filter(c => c.type === 'expense').map(c => c.name);
+      setCategory(expenses.length > 0 ? expenses[0] : '');
       setDescription('');
       setDate(new Date().toISOString().split('T')[0]);
       setIsRecurring(false);
@@ -135,9 +138,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
   // Update category automatically if type changes
   React.useEffect(() => {
     if (!initialData || type !== initialData.type) {
-      setCategory(CATEGORIES[type][0]);
+      if (currentCategories.length > 0 && !currentCategories.includes(category)) {
+        setCategory(currentCategories[0]);
+      }
     }
-  }, [type, initialData]);
+  }, [type, initialData, currentCategories]);
 
   if (!isOpen) return null;
 
@@ -154,7 +159,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
       recurrenceInterval: isRecurring ? recurrenceInterval : undefined
     });
     setAmount('');
-    setCategory(CATEGORIES[type][0]);
+    setCategory(defaultCategory);
     setDescription('');
     setDate(new Date().toISOString().split('T')[0]);
     setIsRecurring(false);
@@ -193,7 +198,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
           </NumberInputRoot>
           <SelectRoot
             collection={createListCollection({
-              items: CATEGORIES[type].map(c => ({ label: c, value: c }))
+              items: currentCategories.map(c => ({ label: c, value: c }))
             })}
             value={[category]}
             onValueChange={(e) => setCategory(e.value[0])}
@@ -204,7 +209,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
               <SelectValueText placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              {CATEGORIES[type].map(cat => (
+              {currentCategories.map(cat => (
                 <SelectItem item={{ label: cat, value: cat }} key={cat}>
                   {cat}
                 </SelectItem>

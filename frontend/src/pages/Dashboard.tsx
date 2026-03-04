@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import pastaLogo from '../assets/pastalogo.svg';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { fetchTransactions, createTransaction, updateTransaction, deleteTransaction, type Transaction } from '../services/api';
 import { TransactionModal } from '../components/TransactionModal';
+import { IconRenderer } from '../components/IconRenderer';
 import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from '../components/ui/select';
 import { createListCollection } from '@chakra-ui/react';
 
@@ -145,6 +148,8 @@ const monthCollection = createListCollection({
 
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
+  const { categories } = useSettings();
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [acceptingTemplates, setAcceptingTemplates] = useState<Set<string>>(new Set());
@@ -279,7 +284,7 @@ const Dashboard: React.FC = () => {
           <img src={pastaLogo} alt="Pasta Logo" style={{ height: '32px' }} />
         </Title>
         <HeaderActions>
-          <Button onClick={() => window.location.href = '/templates'}>Manage Templates</Button>
+          <Button onClick={() => navigate('/settings')}>Settings</Button>
           <Button $primary onClick={handleOpenModalForCreate}>+ Add Transaction</Button>
           <Button onClick={logout}>Sign Out</Button>
         </HeaderActions>
@@ -353,44 +358,60 @@ const Dashboard: React.FC = () => {
         {filteredTransactions.length === 0 && (
           <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>No transactions found for this period</div>
         )}
-        {filteredTransactions.map((tx, idx) => (
-          <TransactionItem key={tx.transactionId || idx} onClick={() => handleOpenModalForEdit(tx)}>
-            <TxLeft>
-              <TxTitle>{tx.category}</TxTitle>
-              <TxSubtitle>{tx.description || new Date(tx.date).toLocaleDateString()}</TxSubtitle>
-            </TxLeft>
-            <TxAmount $type={tx.type}>
-              {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-            </TxAmount>
-          </TransactionItem>
-        ))}
+        {filteredTransactions.map((tx, idx) => {
+          const catDef = categories.find(c => c.name === tx.category);
+          return (
+            <TransactionItem key={tx.transactionId || idx} onClick={() => handleOpenModalForEdit(tx)}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex' }}>
+                  <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
+                </div>
+                <TxLeft>
+                  <TxTitle>{tx.category}</TxTitle>
+                  <TxSubtitle>{tx.description || new Date(tx.date).toLocaleDateString()}</TxSubtitle>
+                </TxLeft>
+              </div>
+              <TxAmount $type={tx.type}>
+                {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+              </TxAmount>
+            </TransactionItem>
+          );
+        })}
       </TransactionList>
 
       {suggestedTemplates.length > 0 && (
         <>
           <Title style={{ fontSize: '24px', margin: '32px 0 16px' }}>Suggested Actions</Title>
           <TransactionList>
-            {suggestedTemplates.map((template, idx) => (
-              <TransactionItem key={template.transactionId || idx} style={{ borderLeft: '4px solid #3b82f6', background: 'rgba(59, 130, 246, 0.05)' }}>
-                <TxLeft>
-                  <TxTitle>{template.category}</TxTitle>
-                  <TxSubtitle>Recurring {template.recurrenceInterval === 1 ? 'Monthly' : `Every ${template.recurrenceInterval} Months`} - {template.description}</TxSubtitle>
-                </TxLeft>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <TxAmount $type={template.type}>
-                    {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
-                  </TxAmount>
-                  <Button
-                    $primary
-                    disabled={acceptingTemplates.has(template.transactionId!)}
-                    style={{ opacity: acceptingTemplates.has(template.transactionId!) ? 0.5 : 1, cursor: acceptingTemplates.has(template.transactionId!) ? 'not-allowed' : 'pointer' }}
-                    onClick={(e) => { e.stopPropagation(); handleAcceptSuggestion(template); }}
-                  >
-                    {acceptingTemplates.has(template.transactionId!) ? 'Accepting...' : 'Accept'}
-                  </Button>
-                </div>
-              </TransactionItem>
-            ))}
+            {suggestedTemplates.map((template, idx) => {
+              const catDef = categories.find(c => c.name === template.category);
+              return (
+                <TransactionItem key={template.transactionId || idx} style={{ borderLeft: '4px solid #3b82f6', background: 'rgba(59, 130, 246, 0.05)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ padding: '10px', background: 'rgba(59,130,246,0.1)', borderRadius: '12px', display: 'flex' }}>
+                      <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color="#3b82f6" />
+                    </div>
+                    <TxLeft>
+                      <TxTitle>{template.category}</TxTitle>
+                      <TxSubtitle>Recurring {template.recurrenceInterval === 1 ? 'Monthly' : `Every ${template.recurrenceInterval} Months`} - {template.description}</TxSubtitle>
+                    </TxLeft>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <TxAmount $type={template.type}>
+                      {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
+                    </TxAmount>
+                    <Button
+                      $primary
+                      disabled={acceptingTemplates.has(template.transactionId!)}
+                      style={{ opacity: acceptingTemplates.has(template.transactionId!) ? 0.5 : 1, cursor: acceptingTemplates.has(template.transactionId!) ? 'not-allowed' : 'pointer' }}
+                      onClick={(e) => { e.stopPropagation(); handleAcceptSuggestion(template); }}
+                    >
+                      {acceptingTemplates.has(template.transactionId!) ? 'Accepting...' : 'Accept'}
+                    </Button>
+                  </div>
+                </TransactionItem>
+              );
+            })}
           </TransactionList>
         </>
       )}

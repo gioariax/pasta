@@ -42,6 +42,21 @@ Resources:
         - Key: project
           Value: pasta
 
+  UserSettingsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${AWS::StackName}-UserSettings
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: project
+          Value: pasta
+
   # -----------------------------------------------------------------
   # Cognito User Pool & Client
   # -----------------------------------------------------------------
@@ -161,6 +176,44 @@ Resources:
             RestApiId: !Ref PastaApi
             Path: /transactions/{id}
             Method: DELETE
+
+  GetSettingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/handlers/
+      Handler: settings.getSettings
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref UserSettingsTable
+      Environment:
+        Variables:
+          SETTINGS_TABLE_NAME: !Ref UserSettingsTable
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PastaApi
+            Path: /settings
+            Method: GET
+
+  UpdateSettingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/handlers/
+      Handler: settings.updateSettings
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref UserSettingsTable
+      Environment:
+        Variables:
+          SETTINGS_TABLE_NAME: !Ref UserSettingsTable
+      Events:
+        PutApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PastaApi
+            Path: /settings
+            Method: PUT
 
 Outputs:
   ApiEndpoint:

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild src/handlers/transactions.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/handlers/transactions.js",
+    "build": "esbuild src/handlers/transactions.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/handlers/transactions.js && esbuild src/handlers/settings.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/handlers/settings.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
