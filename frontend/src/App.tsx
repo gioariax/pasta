@@ -8,6 +8,10 @@ import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import { SettingsProvider } from './contexts/SettingsContext';
 
+import { AppLayout } from './components/layout/AppLayout';
+import Transactions from './pages/Transactions';
+import Charts from './pages/Charts';
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -16,22 +20,20 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+
             <Route
-              path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <AppLayout />
                 </ProtectedRoute>
               }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              }
-            />
+            >
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/charts" element={<Charts />} />
+              <Route path="/settings" element={<Settings />} />
+            </Route>
+
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>

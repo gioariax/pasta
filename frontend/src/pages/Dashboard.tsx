@@ -1,28 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import pastaLogo from '../assets/pastalogo.svg';
+import { FiHome } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { fetchTransactions, createTransaction, updateTransaction, deleteTransaction, type Transaction } from '../services/api';
-import { TransactionModal } from '../components/TransactionModal';
+import { fetchTransactions, createTransaction, type Transaction } from '../services/api';
 import { IconRenderer } from '../components/IconRenderer';
-import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from '../components/ui/select';
-import { createListCollection } from '@chakra-ui/react';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
   max-width: 1200px;
   margin: 0 auto;
 `;
-
-const FilterContainer = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-  align-items: center;
-`;
-
 
 const Header = styled.header`
   display: flex;
@@ -104,11 +93,6 @@ const TransactionItem = styled.div`
   background: rgba(255, 255, 255, 0.02);
   border-radius: 12px;
   transition: background 0.2s;
-  cursor: pointer;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
 `;
 
 const TxLeft = styled.div`
@@ -137,26 +121,16 @@ const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
 };
 
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
-
-const monthCollection = createListCollection({
-  items: MONTHS.map((m, idx) => ({ label: m, value: String(idx) }))
-});
-
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
   const { categories } = useSettings();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isModalOpen, setModalOpen] = useState(false);
   const [acceptingTemplates, setAcceptingTemplates] = useState<Set<string>>(new Set());
 
   const currentDate = new Date();
-  const [selectedMonth, setSelectedMonth] = useState<number>(currentDate.getMonth());
-  const [selectedYear, setSelectedYear] = useState<number>(currentDate.getFullYear());
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
 
   useEffect(() => {
     loadTransactions();
@@ -171,62 +145,23 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-
-  const handleOpenModalForCreate = () => {
-    setEditingTransaction(null);
-    setModalOpen(true);
-  };
-
-  const handleOpenModalForEdit = (tx: Transaction) => {
-    setEditingTransaction(tx);
-    setModalOpen(true);
-  };
-
-  const handleSaveTransaction = async (data: any) => {
-    try {
-      if (editingTransaction && editingTransaction.transactionId) {
-        // Update
-        await updateTransaction(editingTransaction.transactionId, data);
-      } else {
-        // Create
-        await createTransaction(data);
-      }
-      await loadTransactions(); // Refresh everything to get implicitly created templates
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleDeleteTransaction = async (id: string) => {
-    try {
-      await deleteTransaction(id);
-      await loadTransactions();
-      setModalOpen(false);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const normalTransactions = transactions.filter(t => !t.isTemplate && !t.transactionId?.startsWith('TEMPLATE_'));
   const activeTemplates = transactions.filter(t => (t.isTemplate || t.transactionId?.startsWith('TEMPLATE_')) && t.isActive !== false);
 
-  const filteredTransactions = normalTransactions.filter(tx => {
+  const currentMonthTransactions = normalTransactions.filter(tx => {
     const txDate = new Date(tx.date);
-    return txDate.getMonth() === selectedMonth && txDate.getFullYear() === selectedYear;
+    return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
   });
 
-  // Suggestion Engine
+  // Suggestion Engine based ONLY on current month since overview is locked to "Today/This Month"
   const suggestedTemplates = activeTemplates.filter(template => {
     if (!template.date) return false;
     const tDate = new Date(template.date);
-    const monthsDifference = (selectedYear - tDate.getFullYear()) * 12 + (selectedMonth - tDate.getMonth());
+    const monthsDifference = (currentYear - tDate.getFullYear()) * 12 + (currentMonth - tDate.getMonth());
 
-    // Check if interval matches and it's not in the future
     const interval = template.recurrenceInterval || 1;
     if (monthsDifference >= 0 && monthsDifference % interval === 0) {
-      // Check if already paid this month
-      const alreadyPaid = filteredTransactions.some(tx => tx.recurrenceId === template.transactionId);
+      const alreadyPaid = currentMonthTransactions.some(tx => tx.recurrenceId === template.transactionId);
       return !alreadyPaid;
     }
     return false;
@@ -247,7 +182,7 @@ const Dashboard: React.FC = () => {
         category: template.category,
         description: template.description || 'Recurring Transaction',
         type: template.type,
-        date: new Date(selectedYear, selectedMonth, new Date().getDate()).toISOString(),
+        date: new Date(currentYear, currentMonth, new Date().getDate()).toISOString(),
         recurrenceId: template.transactionId,
       };
       await createTransaction(newTx);
@@ -263,74 +198,21 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const income = filteredTransactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
-  const expense = filteredTransactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
+  const income = currentMonthTransactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
+  const expense = currentMonthTransactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const balance = income - expense;
 
   const suggestedExpense = suggestedTemplates.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const projectedExpenses = expense + suggestedExpense;
 
-  const currentYearNum = currentDate.getFullYear();
-  const availableYears = [currentYearNum - 2, currentYearNum - 1, currentYearNum, currentYearNum + 1, currentYearNum + 2];
-
-  const yearCollection = createListCollection({
-    items: availableYears.map(y => ({ label: String(y), value: String(y) }))
-  });
-
   return (
     <Container>
       <Header>
-        <Title>
-          <img src={pastaLogo} alt="Pasta Logo" style={{ height: '32px' }} />
-        </Title>
+        <Title><FiHome /> Overview</Title>
         <HeaderActions>
-          <Button onClick={() => navigate('/settings')}>Settings</Button>
-          <Button $primary onClick={handleOpenModalForCreate}>+ Add Transaction</Button>
           <Button onClick={logout}>Sign Out</Button>
         </HeaderActions>
       </Header>
-
-      <FilterContainer>
-        <SelectRoot
-          size="sm"
-          width="120px"
-          collection={yearCollection}
-          value={[String(selectedYear)]}
-          onValueChange={(e) => setSelectedYear(Number(e.value[0]))}
-          variant="subtle"
-        >
-          <SelectTrigger>
-            <SelectValueText placeholder="Year" />
-          </SelectTrigger>
-          <SelectContent>
-            {yearCollection.items.map((item) => (
-              <SelectItem item={item} key={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </SelectRoot>
-
-        <SelectRoot
-          size="sm"
-          width="160px"
-          collection={monthCollection}
-          value={[String(selectedMonth)]}
-          onValueChange={(e) => setSelectedMonth(Number(e.value[0]))}
-          variant="subtle"
-        >
-          <SelectTrigger>
-            <SelectValueText placeholder="Month" />
-          </SelectTrigger>
-          <SelectContent>
-            {monthCollection.items.map((item) => (
-              <SelectItem item={item} key={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </SelectRoot>
-      </FilterContainer>
 
       <CardsGrid>
         <SummaryCard>
@@ -353,35 +235,9 @@ const Dashboard: React.FC = () => {
         )}
       </CardsGrid>
 
-      <Title style={{ fontSize: '24px', marginBottom: '16px' }}>Recent Transactions</Title>
-      <TransactionList>
-        {filteredTransactions.length === 0 && (
-          <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>No transactions found for this period</div>
-        )}
-        {filteredTransactions.map((tx, idx) => {
-          const catDef = categories.find(c => c.name === tx.category);
-          return (
-            <TransactionItem key={tx.transactionId || idx} onClick={() => handleOpenModalForEdit(tx)}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex' }}>
-                  <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
-                </div>
-                <TxLeft>
-                  <TxTitle>{tx.category}</TxTitle>
-                  <TxSubtitle>{tx.description || new Date(tx.date).toLocaleDateString()}</TxSubtitle>
-                </TxLeft>
-              </div>
-              <TxAmount $type={tx.type}>
-                {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-              </TxAmount>
-            </TransactionItem>
-          );
-        })}
-      </TransactionList>
-
       {suggestedTemplates.length > 0 && (
         <>
-          <Title style={{ fontSize: '24px', margin: '32px 0 16px' }}>Suggested Actions</Title>
+          <Title style={{ fontSize: '24px', margin: '32px 0 16px' }}>Suggested Actions for This Month</Title>
           <TransactionList>
             {suggestedTemplates.map((template, idx) => {
               const catDef = categories.find(c => c.name === template.category);
@@ -416,13 +272,10 @@ const Dashboard: React.FC = () => {
         </>
       )}
 
-      <TransactionModal
-        isOpen={isModalOpen}
-        initialData={editingTransaction}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleSaveTransaction}
-        onDelete={handleDeleteTransaction}
-      />
+      <div style={{ marginTop: '32px', textAlign: 'center' }}>
+        <Button $primary onClick={() => navigate('/transactions')}>View All Transactions</Button>
+      </div>
+
     </Container>
   );
 };
