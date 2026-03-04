@@ -77,13 +77,14 @@ const CardLabel = styled.span`
   font-size: 14px;
 `;
 
-const CardValue = styled.span<{ $type?: 'income' | 'expense' }>`
+const CardValue = styled.span<{ $type?: 'income' | 'expense' | 'projected' }>`
   font-size: 32px;
   font-weight: 600;
   color: ${({ theme, $type }) =>
     $type === 'income' ? theme.colors.success :
       $type === 'expense' ? theme.colors.danger :
-        theme.colors.textPrimary};
+        $type === 'projected' ? '#3b82f6' :
+          theme.colors.textPrimary};
 `;
 
 const TransactionList = styled.div`
@@ -331,10 +332,6 @@ const Dashboard: React.FC = () => {
           <CardLabel>Current Balance</CardLabel>
           <CardValue>{formatCurrency(balance)}</CardValue>
         </SummaryCard>
-        <SummaryCard style={suggestedTemplates.filter(t => t.type === 'expense').length > 0 ? { border: '1px solid rgba(59, 130, 246, 0.3)' } : {}}>
-          <CardLabel>Projected Expenses</CardLabel>
-          <CardValue $type="expense">-{formatCurrency(projectedExpenses)}</CardValue>
-        </SummaryCard>
         <SummaryCard>
           <CardLabel>Total Income</CardLabel>
           <CardValue $type="income">+{formatCurrency(income)}</CardValue>
@@ -343,6 +340,12 @@ const Dashboard: React.FC = () => {
           <CardLabel>Total Expenses</CardLabel>
           <CardValue $type="expense">-{formatCurrency(expense)}</CardValue>
         </SummaryCard>
+        {suggestedTemplates.filter(t => t.type === 'expense').length > 0 && (
+          <SummaryCard>
+            <CardLabel>Projected Expenses</CardLabel>
+            <CardValue $type="projected">-{formatCurrency(projectedExpenses)}</CardValue>
+          </SummaryCard>
+        )}
       </CardsGrid>
 
       <Title style={{ fontSize: '24px', marginBottom: '16px' }}>Recent Transactions</Title>
