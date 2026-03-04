@@ -292,7 +292,7 @@ const Dashboard: React.FC = () => {
           collection={yearCollection}
           value={[String(selectedYear)]}
           onValueChange={(e) => setSelectedYear(Number(e.value[0]))}
-          variant="outline"
+          variant="subtle"
         >
           <SelectTrigger>
             <SelectValueText placeholder="Year" />
@@ -312,7 +312,7 @@ const Dashboard: React.FC = () => {
           collection={monthCollection}
           value={[String(selectedMonth)]}
           onValueChange={(e) => setSelectedMonth(Number(e.value[0]))}
-          variant="outline"
+          variant="subtle"
         >
           <SelectTrigger>
             <SelectValueText placeholder="Month" />

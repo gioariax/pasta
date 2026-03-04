@@ -107,7 +107,7 @@ export const SelectRoot = React.forwardRef<
   return (
     <ChakraSelect.Root
       {...props}
-      variant="outline"
+      variant="subtle"
       ref={ref}
       positioning={{ sameWidth: true, ...props.positioning }}
     >

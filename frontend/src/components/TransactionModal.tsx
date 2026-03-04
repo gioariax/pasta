@@ -175,6 +175,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
               { label: 'Expense', value: 'expense' },
               { label: 'Income', value: 'income' }
             ]}
+            css={{
+              "--segment-indicator-bg": "#6366f1",
+              "--segment-item-color": "white",
+            }}
           />
           <NumberInputRoot
             value={amount}
@@ -183,6 +187,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             min={0}
             required
             width="full"
+            variant="subtle"
           >
             <NumberInputField placeholder="Amount" />
           </NumberInputRoot>
@@ -192,7 +197,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             })}
             value={[category]}
             onValueChange={(e) => setCategory(e.value[0])}
-            variant="outline"
+            variant="subtle"
             width="full"
           >
             <SelectTrigger>
@@ -207,7 +212,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             </SelectContent>
           </SelectRoot>
           <Input
-            variant="outline"
+            variant="subtle"
             placeholder="Description..."
             value={description}
             onChange={e => setDescription(e.target.value)}
@@ -216,6 +221,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             value={date ? [parseDate(date)] : []}
             onValueChange={(e) => setDate(e.value[0]?.toString() ?? new Date().toISOString().split('T')[0])}
             width="full"
+            variant="subtle"
           >
             <DatePickerControl>
               <DatePickerInput placeholder="Select date" />
@@ -237,7 +243,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
               collection={recurrenceCollection}
               value={[String(recurrenceInterval)]}
               onValueChange={(e) => setRecurrenceInterval(Number(e.value[0]))}
-              variant="outline"
+              variant="subtle"
+              width="full"
             >
               <SelectTrigger>
                 <SelectValueText placeholder="Select interval" />
