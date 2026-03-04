@@ -106,7 +106,7 @@ Resources:
   GetTransactionsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/daa091759c93db7694321b1331d31916
+      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/570aa8fd39020b7286a39486f64d47e3
       Handler: transactions.getTransactions
       Policies:
       - DynamoDBReadPolicy:
@@ -123,7 +123,7 @@ Resources:
   CreateTransactionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/daa091759c93db7694321b1331d31916
+      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/570aa8fd39020b7286a39486f64d47e3
       Handler: transactions.createTransaction
       Policies:
       - DynamoDBWritePolicy:
@@ -140,7 +140,7 @@ Resources:
   UpdateTransactionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/daa091759c93db7694321b1331d31916
+      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/570aa8fd39020b7286a39486f64d47e3
       Handler: transactions.updateTransaction
       Policies:
       - DynamoDBWritePolicy:
@@ -157,7 +157,7 @@ Resources:
   DeleteTransactionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/daa091759c93db7694321b1331d31916
+      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/570aa8fd39020b7286a39486f64d47e3
       Handler: transactions.deleteTransaction
       Policies:
       - DynamoDBCrudPolicy:
@@ -174,7 +174,7 @@ Resources:
   GetSettingsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/daa091759c93db7694321b1331d31916
+      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/570aa8fd39020b7286a39486f64d47e3
       Handler: settings.getSettings
       Policies:
       - DynamoDBReadPolicy:
@@ -195,7 +195,7 @@ Resources:
   UpdateSettingsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/daa091759c93db7694321b1331d31916
+      CodeUri: s3://budget-app-backend-eace1a68-47c0-48cc-95ca-e254d2fd86fa/570aa8fd39020b7286a39486f64d47e3
       Handler: settings.updateSettings
       Policies:
       - DynamoDBWritePolicy:
