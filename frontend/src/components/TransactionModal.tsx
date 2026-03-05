@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { NumberInputRoot, NumberInputField } from './ui/number-input';
 import { Input, parseDate, createListCollection } from '@chakra-ui/react';
 import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from './ui/select';
 import { SegmentedControl } from './ui/segmented-control';
@@ -185,17 +184,20 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
               "--segment-item-color": "white",
             }}
           />
-          <NumberInputRoot
+          <Input
             value={amount}
-            onValueChange={(e) => setAmount(e.value)}
-            step={0.01}
-            min={0}
+            onChange={(e) => {
+              const val = e.target.value.replace(',', '.');
+              if (/^\d*\.?\d*$/.test(val)) {
+                setAmount(val);
+              }
+            }}
+            inputMode="decimal"
+            placeholder="Amount"
             required
             width="full"
             variant="subtle"
-          >
-            <NumberInputField placeholder="Amount" />
-          </NumberInputRoot>
+          />
           <SelectRoot
             collection={createListCollection({
               items: currentCategories.map(c => ({ label: c, value: c }))
