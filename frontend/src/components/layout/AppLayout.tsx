@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Outlet, NavLink } from 'react-router-dom';
-import { FiHome, FiList, FiBarChart2, FiSettings } from 'react-icons/fi';
+import { FiHome, FiList, FiSettings } from 'react-icons/fi';
 
 import { useTranslation } from 'react-i18next';
 
