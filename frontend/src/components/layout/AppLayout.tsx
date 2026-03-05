@@ -78,10 +78,10 @@ export const AppLayout: React.FC = () => {
           <FiList size={22} />
           <span>{t('common.transactions')}</span>
         </NavItem>
-        <NavItem to="/charts">
+        {/* <NavItem to="/charts">
           <FiBarChart2 size={22} />
           <span>{t('common.charts')}</span>
-        </NavItem>
+        </NavItem> */}
         <NavItem to="/settings">
           <FiSettings size={22} />
           <span>{t('common.settings')}</span>
