@@ -7,6 +7,7 @@ import { TransactionModal } from '../components/TransactionModal';
 import { IconRenderer } from '../components/IconRenderer';
 import { DateSelector } from '../components/DateSelector';
 import { useDateStore } from '../store/dateStore';
+import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -99,6 +100,7 @@ const formatCurrency = (amount: number) => {
 
 
 const Transactions: React.FC = () => {
+    const { t } = useTranslation();
     const { categories } = useSettings();
     const { selectedMonth, selectedYear } = useDateStore();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -163,15 +165,15 @@ const Transactions: React.FC = () => {
     return (
         <Container>
             <Header>
-                <Title><FiList /> Transactions</Title>
-                <Button $primary onClick={handleOpenModalForCreate}>+ Add Transaction</Button>
+                <Title><FiList /> {t('common.transactions')}</Title>
+                <Button $primary onClick={handleOpenModalForCreate}>{t('transactions.addTransaction')}</Button>
             </Header>
 
             <DateSelector />
 
             <TransactionList>
                 {filteredTransactions.length === 0 && (
-                    <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>No transactions found for this period</div>
+                    <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>{t('transactions.noTransactions')}</div>
                 )}
                 {filteredTransactions.map((tx, idx) => {
                     const catDef = categories.find(c => c.name === tx.category);

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { signUp, confirmRegistration } from '../services/cognito';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
   display: flex;
@@ -91,6 +92,7 @@ const BottomText = styled.p`
 `;
 
 const Register: React.FC = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -135,7 +137,7 @@ const Register: React.FC = () => {
   return (
     <Container>
       <Card>
-        <Title>{step === 'register' ? 'Create Account' : 'Verify Email'}</Title>
+        <Title>{step === 'register' ? t('auth.createAccount') : t('auth.verifyEmail')}</Title>
         {success && <SuccessText>{success}</SuccessText>}
         {error && <ErrorText>{error}</ErrorText>}
 
@@ -143,40 +145,40 @@ const Register: React.FC = () => {
           <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Input
               type="email"
-              placeholder="Email address"
+              placeholder={t('auth.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
             <Input
               type="password"
-              placeholder="Password"
+              placeholder={t('auth.passwordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
             <Button type="submit" disabled={loading}>
-              {loading ? 'Registering...' : 'Sign Up'}
+              {loading ? t('auth.registering') : t('auth.signUp')}
             </Button>
           </form>
         ) : (
           <form onSubmit={handleConfirm} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Input
               type="text"
-              placeholder="Verification Code"
+              placeholder={t('auth.verificationCode')}
               value={code}
               onChange={(e) => setCode(e.target.value)}
               required
             />
             <Button type="submit" disabled={loading}>
-              {loading ? 'Verifying...' : 'Verify'}
+              {loading ? t('auth.verifying') : t('auth.verify')}
             </Button>
           </form>
         )}
 
         {step === 'register' && (
           <BottomText>
-            Already have an account? <Link to="/login">Sign in</Link>
+            {t('auth.haveAccount')} <Link to="/login">{t('auth.signInLink')}</Link>
           </BottomText>
         )}
       </Card>

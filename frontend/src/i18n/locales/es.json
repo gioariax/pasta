@@ -1,0 +1,84 @@
+{
+    "common": {
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "add": "Agregar",
+        "accept": "Aceptar",
+        "accepting": "Aceptando...",
+        "back": "Atrás",
+        "overview": "Resumen",
+        "transactions": "Transacciones",
+        "charts": "Gráficos",
+        "settings": "Ajustes",
+        "income": "Ingreso",
+        "expense": "Gasto"
+    },
+    "layout": {
+        "signOut": "Cerrar Sesión"
+    },
+    "dashboard": {
+        "currentBalance": "Balance Actual",
+        "totalIncome": "Ingresos Totales",
+        "totalExpenses": "Gastos Totales",
+        "projectedExpenses": "Gastos Proyectados",
+        "suggestedActions": "Acciones Sugeridas este Mes",
+        "viewAllTransactions": "Ver Todas las Transacciones"
+    },
+    "transactions": {
+        "addTransaction": "+ Agregar Transacción",
+        "year": "Año",
+        "month": "Mes",
+        "noTransactions": "No se encontraron transacciones para este período"
+    },
+    "charts": {
+        "placeholder": "Gráficos analíticos irán aquí."
+    },
+    "settings": {
+        "categories": "Categorías",
+        "recurringTransactions": "Transacciones Recurrentes",
+        "manageCategories": "Administrar Categorías",
+        "newCategory": "Nueva Categoría",
+        "name": "Nombre",
+        "type": "Tipo",
+        "typePlaceholder": "Seleccionar tipo",
+        "categoryNamePlaceholder": "Ej., Servicios",
+        "selectIcon": "Seleccionar Icono",
+        "saveCategory": "Guardar Categoría",
+        "deleteCategoryConfirm": "¿Estás seguro de querer eliminar esta categoría? Las transacciones pasadas no se verán afectadas, pero ya no estará disponible para nuevas transacciones."
+    },
+    "templates": {
+        "manageTemplates": "Administrar Plantillas",
+        "backToDashboard": "Volver al Resumen",
+        "yourTemplates": "Tus Plantillas Recurrentes",
+        "noTemplates": "No se encontraron plantillas activas",
+        "intervalMonthly": "Mensual",
+        "intervalMonths": "Cada {{count}} Meses",
+        "recurringMonthly": "Recurrente Mensual",
+        "recurringMonths": "Recurrente Cada {{count}} Meses"
+    },
+    "auth": {
+        "welcomeBack": "¡Bienvenido de Nuevo!",
+        "setNewPassword": "Establecer Nueva Contraseña",
+        "passwordUpdateRequired": "Su administrador ha solicitado que actualice su contraseña.",
+        "emailPlaceholder": "Correo electrónico",
+        "passwordPlaceholder": "Contraseña",
+        "newPasswordPlaceholder": "Ingrese su nueva contraseña",
+        "signIn": "Iniciar Sesión",
+        "signingIn": "Iniciando...",
+        "updateAndLogin": "Actualizar Contraseña y Entrar",
+        "updating": "Actualizando...",
+        "noAccount": "¿No tienes una cuenta?",
+        "signUpLink": "Regístrate",
+        "createAccount": "Crear Cuenta",
+        "verifyEmail": "Verificar Correo",
+        "signUp": "Registrarse",
+        "registering": "Registrando...",
+        "verificationCode": "Código de Verificación",
+        "verify": "Verificar",
+        "verifying": "Verificando...",
+        "haveAccount": "¿Ya tienes una cuenta?",
+        "signInLink": "Iniciar Sesión"
+    }
+}

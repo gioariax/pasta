@@ -5,6 +5,7 @@ import type { Category } from '../services/api';
 import { IconRenderer } from './IconRenderer';
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from './ui/select';
+import { useTranslation } from 'react-i18next';
 import { createListCollection } from '@chakra-ui/react';
 
 const POPULAR_ICONS = [
@@ -127,6 +128,18 @@ const Input = styled.input`
   border-radius: 8px;
   color: white;
   font-size: 14px;
+  
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #a1a1aa;
 `;
 
 const IconsGrid = styled.div`
@@ -151,14 +164,8 @@ const IconOption = styled.button<{ $selected: boolean }>`
   }
 `;
 
-const typeCollection = createListCollection({
-    items: [
-        { label: 'Expense', value: 'expense' },
-        { label: 'Income', value: 'income' }
-    ]
-});
-
 export const CategoryManager: React.FC = () => {
+    const { t } = useTranslation();
     const { categories, saveCategories } = useSettings();
 
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -207,75 +214,84 @@ export const CategoryManager: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm('Are you sure you want to delete this category? Past transactions with this category will remain unaffected but it will no longer be available for new transactions.')) {
+        if (confirm(t('settings.deleteCategoryConfirm'))) {
             const updatedCategories = categories.filter(c => c.id !== id);
             await saveCategories(updatedCategories);
         }
     };
 
-    const renderEditor = () => (
-        <EditorContainer>
-            <div style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#a1a1aa' }}>Name</label>
-                    <Input
-                        value={editForm.name || ''}
-                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        placeholder="E.g., Utilities"
-                    />
-                </div>
-                <div style={{ width: '150px' }}>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#a1a1aa' }}>Type</label>
-                    <SelectRoot
-                        collection={typeCollection}
-                        value={[editForm.type || 'expense']}
-                        onValueChange={(e) => setEditForm({ ...editForm, type: e.value[0] as 'income' | 'expense' })}
-                        variant="subtle"
-                    >
-                        <SelectTrigger>
-                            <SelectValueText placeholder="Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {typeCollection.items.map((item) => (
-                                <SelectItem item={item} key={item.value}>
-                                    {item.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </SelectRoot>
-                </div>
-            </div>
+    const renderEditor = () => {
+        const typeCollection = createListCollection({
+            items: [
+                { label: t('common.expense'), value: 'expense' },
+                { label: t('common.income'), value: 'income' }
+            ]
+        });
 
-            <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#a1a1aa' }}>Select Icon</label>
-                <IconsGrid>
-                    {POPULAR_ICONS.map(iconName => (
-                        <IconOption
-                            key={iconName}
-                            $selected={editForm.icon === iconName}
-                            onClick={() => setEditForm(prev => ({ ...prev, icon: iconName }))}
-                            title={iconName}
+        return (
+            <EditorContainer>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                    <div style={{ flex: 1 }}>
+                        <Label>{t('settings.name')}</Label>
+                        <Input
+                            value={editForm.name || ''}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, name: e.target.value })}
+                            placeholder={t('settings.categoryNamePlaceholder')}
+                        />
+                    </div>
+                    <div style={{ width: '150px' }}>
+                        <Label>{t('settings.type')}</Label>
+                        <SelectRoot
+                            collection={typeCollection}
+                            value={[editForm.type || 'expense']}
+                            onValueChange={(e) => setEditForm({ ...editForm, type: e.value[0] as 'income' | 'expense' })}
+                            variant="subtle"
                         >
-                            <IconRenderer name={iconName} size={20} />
-                        </IconOption>
-                    ))}
-                </IconsGrid>
-            </div>
+                            <SelectTrigger>
+                                <SelectValueText placeholder={t('settings.typePlaceholder')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {typeCollection.items.map((item) => (
+                                    <SelectItem item={item} key={item.value}>
+                                        {item.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </SelectRoot>
+                    </div>
+                </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
-                <Button onClick={handleCancel}>Cancel</Button>
-                <Button $primary onClick={handleSave}>Save Category</Button>
-            </div>
-        </EditorContainer>
-    );
+                <div>
+                    <Label>{t('settings.selectIcon')}</Label>
+                    <IconsGrid>
+                        {POPULAR_ICONS.map(iconName => (
+                            <IconOption
+                                key={iconName}
+                                $selected={editForm.icon === iconName}
+                                onClick={() => setEditForm(prev => ({ ...prev, icon: iconName }))}
+                                title={iconName}
+                            >
+                                <IconRenderer name={iconName} size={20} />
+                            </IconOption>
+                        ))}
+                    </IconsGrid>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+                    <Button onClick={handleCancel}>{t('common.cancel')}</Button>
+                    <Button $primary onClick={handleSave}>{t('settings.saveCategory')}</Button>
+                </div>
+            </EditorContainer>
+        );
+    };
 
     return (
         <Container>
             <HeaderContainer>
-                <h2 style={{ fontSize: '20px', fontWeight: 600 }}>Manage Categories</h2>
+                <h2 style={{ fontSize: '20px', fontWeight: 600 }}>{t('settings.manageCategories')}</h2>
                 {!isAddingMode && (
                     <Button $primary onClick={handleAddClick}>
-                        <FiPlus /> New Category
+                        <FiPlus /> {t('settings.newCategory')}
                     </Button>
                 )}
             </HeaderContainer>

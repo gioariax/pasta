@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { FiBarChart2 } from 'react-icons/fi';
 import { DateSelector } from '../components/DateSelector';
+import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -27,13 +28,15 @@ const Title = styled.h1`
 `;
 
 const Charts: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <Container>
       <Header>
-        <Title><FiBarChart2 /> Charts</Title>
+        <Title><FiBarChart2 /> {t('common.charts')}</Title>
       </Header>
       <DateSelector />
-      <p style={{ marginTop: '16px' }}>Analytical charts will go here.</p>
+      <p style={{ marginTop: '16px' }}>{t('charts.placeholder')}</p>
     </Container>
   );
 };

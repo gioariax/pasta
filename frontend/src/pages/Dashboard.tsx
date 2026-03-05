@@ -8,6 +8,7 @@ import { fetchTransactions, createTransaction, type Transaction } from '../servi
 import { IconRenderer } from '../components/IconRenderer';
 import { DateSelector } from '../components/DateSelector';
 import { useDateStore } from '../store/dateStore';
+import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -129,6 +130,7 @@ const formatCurrency = (amount: number) => {
 };
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { logout } = useAuth();
   const { categories } = useSettings();
   const { selectedMonth, selectedYear } = useDateStore();
@@ -184,7 +186,7 @@ const Dashboard: React.FC = () => {
       const newTx = {
         amount: template.amount,
         category: template.category,
-        description: template.description || 'Recurring Transaction',
+        description: template.description || t('templates.recurringMonthly'),
         type: template.type,
         date: new Date(selectedYear, selectedMonth, new Date().getDate()).toISOString(),
         recurrenceId: template.transactionId,
@@ -212,9 +214,9 @@ const Dashboard: React.FC = () => {
   return (
     <Container>
       <Header>
-        <Title><FiHome /> Overview</Title>
+        <Title><FiHome /> {t('common.overview')}</Title>
         <HeaderActions>
-          <Button onClick={logout}>Sign Out</Button>
+          <Button onClick={logout}>{t('layout.signOut')}</Button>
         </HeaderActions>
       </Header>
 
@@ -222,20 +224,20 @@ const Dashboard: React.FC = () => {
 
       <CardsGrid>
         <SummaryCard>
-          <CardLabel>Current Balance</CardLabel>
+          <CardLabel>{t('dashboard.currentBalance')}</CardLabel>
           <CardValue>{formatCurrency(balance)}</CardValue>
         </SummaryCard>
         <SummaryCard>
-          <CardLabel>Total Income</CardLabel>
+          <CardLabel>{t('dashboard.totalIncome')}</CardLabel>
           <CardValue $type="income">+{formatCurrency(income)}</CardValue>
         </SummaryCard>
         <SummaryCard>
-          <CardLabel>Total Expenses</CardLabel>
+          <CardLabel>{t('dashboard.totalExpenses')}</CardLabel>
           <CardValue $type="expense">-{formatCurrency(expense)}</CardValue>
         </SummaryCard>
         {suggestedTemplates.filter(t => t.type === 'expense').length > 0 && (
           <SummaryCard>
-            <CardLabel>Projected Expenses</CardLabel>
+            <CardLabel>{t('dashboard.projectedExpenses')}</CardLabel>
             <CardValue $type="projected">-{formatCurrency(projectedExpenses)}</CardValue>
           </SummaryCard>
         )}
@@ -243,7 +245,7 @@ const Dashboard: React.FC = () => {
 
       {suggestedTemplates.length > 0 && (
         <>
-          <Title style={{ fontSize: '24px', margin: '32px 0 16px' }}>Suggested Actions for This Month</Title>
+          <Title style={{ fontSize: '24px', margin: '32px 0 16px' }}>{t('dashboard.suggestedActions')}</Title>
           <TransactionList>
             {suggestedTemplates.map((template, idx) => {
               const catDef = categories.find(c => c.name === template.category);
@@ -255,7 +257,9 @@ const Dashboard: React.FC = () => {
                     </div>
                     <TxLeft>
                       <TxTitle>{template.category}</TxTitle>
-                      <TxSubtitle>Recurring {template.recurrenceInterval === 1 ? 'Monthly' : `Every ${template.recurrenceInterval} Months`} - {template.description}</TxSubtitle>
+                      <TxSubtitle>
+                        {template.recurrenceInterval === 1 ? t('templates.intervalMonthly') : t('templates.intervalMonths', { count: template.recurrenceInterval })} - {template.description}
+                      </TxSubtitle>
                     </TxLeft>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -268,7 +272,7 @@ const Dashboard: React.FC = () => {
                       style={{ opacity: acceptingTemplates.has(template.transactionId!) ? 0.5 : 1, cursor: acceptingTemplates.has(template.transactionId!) ? 'not-allowed' : 'pointer' }}
                       onClick={(e) => { e.stopPropagation(); handleAcceptSuggestion(template); }}
                     >
-                      {acceptingTemplates.has(template.transactionId!) ? 'Accepting...' : 'Accept'}
+                      {acceptingTemplates.has(template.transactionId!) ? t('common.accepting') : t('common.accept')}
                     </Button>
                   </div>
                 </TransactionItem>
@@ -279,7 +283,7 @@ const Dashboard: React.FC = () => {
       )}
 
       <div style={{ marginTop: '32px', textAlign: 'center' }}>
-        <Button $primary onClick={() => navigate('/transactions')}>View All Transactions</Button>
+        <Button $primary onClick={() => navigate('/transactions')}>{t('dashboard.viewAllTransactions')}</Button>
       </div>
 
     </Container>

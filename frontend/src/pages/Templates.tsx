@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { fetchTransactions, updateTransaction, deleteTransaction, type Transaction } from '../services/api';
 import { TransactionModal } from '../components/TransactionModal';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -98,6 +99,7 @@ interface TemplatesProps {
 }
 
 const Templates: React.FC<TemplatesProps> = ({ hideHeader }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -148,25 +150,25 @@ const Templates: React.FC<TemplatesProps> = ({ hideHeader }) => {
     <Container style={{ padding: hideHeader ? 0 : undefined }}>
       {!hideHeader && (
         <Header>
-          <Title>Manage Templates</Title>
+          <Title>{t('templates.manageTemplates')}</Title>
           <HeaderActions>
-            <Button onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
+            <Button onClick={() => navigate('/dashboard')}>{t('templates.backToDashboard')}</Button>
           </HeaderActions>
         </Header>
       )}
 
       {/* Conditionally hide the secondary title if embedded */}
-      {!hideHeader && <Title style={{ fontSize: '24px', marginBottom: '16px' }}>Your Recurring Templates</Title>}
+      {!hideHeader && <Title style={{ fontSize: '24px', marginBottom: '16px' }}>{t('templates.yourTemplates')}</Title>}
 
       <TransactionList>
         {activeTemplates.length === 0 && (
-          <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>No active templates found</div>
+          <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>{t('templates.noTemplates')}</div>
         )}
         {activeTemplates.map((template, idx) => (
           <TransactionItem key={template.transactionId || idx} onClick={() => handleOpenModalForEdit(template)}>
             <TxLeft>
               <TxTitle>{template.category}</TxTitle>
-              <TxSubtitle>Interval: {template.recurrenceInterval === 1 ? 'Monthly' : `Every ${template.recurrenceInterval} Months`} - {template.description}</TxSubtitle>
+              <TxSubtitle>Interval: {template.recurrenceInterval === 1 ? t('templates.intervalMonthly') : t('templates.intervalMonths', { count: template.recurrenceInterval })} - {template.description}</TxSubtitle>
             </TxLeft>
             <TxAmount $type={template.type}>
               {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}

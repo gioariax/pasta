@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { Outlet, NavLink } from 'react-router-dom';
 import { FiHome, FiList, FiBarChart2, FiSettings } from 'react-icons/fi';
 
+import { useTranslation } from 'react-i18next';
+
 const LayoutContainer = styled.div`
   min-height: 100vh;
   padding-bottom: 80px; /* Space for the fixed bottom nav */
@@ -60,6 +62,8 @@ const NavItem = styled(NavLink)`
 `;
 
 export const AppLayout: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <LayoutContainer>
       <ContentWrapper>
@@ -68,19 +72,19 @@ export const AppLayout: React.FC = () => {
       <BottomNav>
         <NavItem to="/dashboard" end>
           <FiHome size={22} />
-          <span>Overview</span>
+          <span>{t('common.overview')}</span>
         </NavItem>
         <NavItem to="/transactions">
           <FiList size={22} />
-          <span>Transactions</span>
+          <span>{t('common.transactions')}</span>
         </NavItem>
         <NavItem to="/charts">
           <FiBarChart2 size={22} />
-          <span>Charts</span>
+          <span>{t('common.charts')}</span>
         </NavItem>
         <NavItem to="/settings">
           <FiSettings size={22} />
-          <span>Settings</span>
+          <span>{t('common.settings')}</span>
         </NavItem>
       </BottomNav>
     </LayoutContainer>

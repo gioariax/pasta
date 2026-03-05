@@ -4,6 +4,7 @@ import pastaLogo from '../assets/pastalogo.svg';
 import { signIn, completeNewPassword } from '../services/cognito';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
   display: flex;
@@ -87,6 +88,7 @@ const BottomText = styled.p`
 `;
 
 const Login: React.FC = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -143,51 +145,51 @@ const Login: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
           <img src={pastaLogo} alt="Pasta Logo" style={{ height: '40px' }} />
         </div>
-        <Title>{isNewPasswordRequired ? 'Set New Password' : 'Welcome Back'}</Title>
+        <Title>{isNewPasswordRequired ? t('auth.setNewPassword') : t('auth.welcomeBack')}</Title>
 
         {isNewPasswordRequired ? (
           <form onSubmit={handleNewPasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <p style={{ color: '#a3a3a3', fontSize: '14px', textAlign: 'center' }}>
-              Your administrator has requested that you update your password.
+              {t('auth.passwordUpdateRequired')}
             </p>
             <Input
               type="password"
-              placeholder="Enter new password"
+              placeholder={t('auth.newPasswordPlaceholder')}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
             />
             {error && <ErrorText>{error}</ErrorText>}
             <Button type="submit" disabled={loading}>
-              {loading ? 'Updating...' : 'Update Password & Login'}
+              {loading ? t('auth.updating') : t('auth.updateAndLogin')}
             </Button>
           </form>
         ) : (
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Input
               type="email"
-              placeholder="Email address"
+              placeholder={t('auth.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
             <Input
               type="password"
-              placeholder="Password"
+              placeholder={t('auth.passwordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
             {error && <ErrorText>{error}</ErrorText>}
             <Button type="submit" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('auth.signingIn') : t('auth.signIn')}
             </Button>
           </form>
         )}
 
         {!isNewPasswordRequired && (
           <BottomText>
-            Don't have an account? <Link to="/register">Sign up</Link>
+            {t('auth.noAccount')} <Link to="/register">{t('auth.signUpLink')}</Link>
           </BottomText>
         )}
       </Card>
