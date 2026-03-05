@@ -7,7 +7,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { fetchTransactions, createTransaction, type Transaction } from '../services/api';
 import { IconRenderer } from '../components/IconRenderer';
 import { DateSelector } from '../components/DateSelector';
-import { useDateContext } from '../contexts/DateContext';
+import { useDateStore } from '../store/dateStore';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -131,7 +131,7 @@ const formatCurrency = (amount: number) => {
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
   const { categories } = useSettings();
-  const { selectedMonth, selectedYear } = useDateContext();
+  const { selectedMonth, selectedYear } = useDateStore();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [acceptingTemplates, setAcceptingTemplates] = useState<Set<string>>(new Set());

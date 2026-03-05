@@ -6,7 +6,7 @@ import { fetchTransactions, createTransaction, updateTransaction, deleteTransact
 import { TransactionModal } from '../components/TransactionModal';
 import { IconRenderer } from '../components/IconRenderer';
 import { DateSelector } from '../components/DateSelector';
-import { useDateContext } from '../contexts/DateContext';
+import { useDateStore } from '../store/dateStore';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -100,7 +100,7 @@ const formatCurrency = (amount: number) => {
 
 const Transactions: React.FC = () => {
     const { categories } = useSettings();
-    const { selectedMonth, selectedYear } = useDateContext();
+    const { selectedMonth, selectedYear } = useDateStore();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isModalOpen, setModalOpen] = useState(false);
 

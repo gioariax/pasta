@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from './ui/select';
 import { createListCollection } from '@chakra-ui/react';
-import { useDateContext } from '../contexts/DateContext';
+import { useDateStore } from '../store/dateStore';
 
 const FilterContainer = styled.div`
   display: flex;
@@ -21,7 +21,7 @@ const monthCollection = createListCollection({
 });
 
 export const DateSelector: React.FC = () => {
-    const { selectedMonth, selectedYear, setSelectedMonth, setSelectedYear } = useDateContext();
+    const { selectedMonth, selectedYear, setSelectedMonth, setSelectedYear } = useDateStore();
 
     const yearCollection = useMemo(() => {
         const currentDate = new Date();
