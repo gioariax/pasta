@@ -25,8 +25,8 @@ const BottomNav = styled.nav`
   min-width: 320px;
   height: 58px;
   background: rgba(23, 23, 23, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 32px;
   display: flex;

@@ -4,27 +4,52 @@ import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem }
 import { createListCollection } from '@chakra-ui/react';
 import { useDateStore } from '../store/dateStore';
 import { useTranslation } from 'react-i18next';
-import { FiChevronDown, FiChevronUp, FiCalendar } from 'react-icons/fi';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 const Wrapper = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
-const DateDisplayButton = styled.button`
+const HeaderRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing.lg};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+`;
+
+const NavButton = styled.button`
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: ${({ theme }) => theme.colors.textPrimary};
+  }
+`;
+
+const DateDisplayButton = styled.div`
   background: none;
   border: none;
   color: ${({ theme }) => theme.colors.textPrimary};
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   cursor: pointer;
-  padding: 0;
+  padding: 4px 16px;
+  border-radius: 8px;
   transition: opacity 0.2s;
   
   &:hover {
     opacity: 0.8;
+    background: rgba(255, 255, 255, 0.05);
   }
 `;
 
@@ -40,8 +65,11 @@ const CollapsibleInner = styled.div`
 
 const FilterContainer = styled.div`
   display: flex;
+  justify-content: center;
   gap: ${({ theme }) => theme.spacing.md};
-  padding-top: ${({ theme }) => theme.spacing.md};
+  padding: ${({ theme }) => theme.spacing.md};
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
   align-items: center;
 `;
 
@@ -49,6 +77,24 @@ export const DateSelector: React.FC = () => {
     const { selectedMonth, selectedYear, setSelectedMonth, setSelectedYear } = useDateStore();
     const { t, i18n } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const handlePrevMonth = () => {
+        if (selectedMonth === 0) {
+            setSelectedMonth(11);
+            setSelectedYear(selectedYear - 1);
+        } else {
+            setSelectedMonth(selectedMonth - 1);
+        }
+    };
+
+    const handleNextMonth = () => {
+        if (selectedMonth === 11) {
+            setSelectedMonth(0);
+            setSelectedYear(selectedYear + 1);
+        } else {
+            setSelectedMonth(selectedMonth + 1);
+        }
+    };
 
     const yearCollection = useMemo(() => {
         const currentDate = new Date();
@@ -76,15 +122,21 @@ export const DateSelector: React.FC = () => {
     const selectedDate = new Date(selectedYear, selectedMonth, 1);
     let monthName = formatter.format(selectedDate);
     monthName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-    const displayText = `${selectedYear}, ${monthName}`;
+    const displayText = `${monthName} ${selectedYear}`;
 
     return (
         <Wrapper>
-            <DateDisplayButton onClick={() => setIsExpanded(!isExpanded)}>
-                <FiCalendar size={24} style={{ color: '#3b82f6' }} />
-                {displayText}
-                {isExpanded ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
-            </DateDisplayButton>
+            <HeaderRow>
+                <NavButton onClick={handlePrevMonth}>
+                    <FiChevronLeft size={24} />
+                </NavButton>
+                <DateDisplayButton onClick={() => setIsExpanded(!isExpanded)}>
+                    {displayText}
+                </DateDisplayButton>
+                <NavButton onClick={handleNextMonth}>
+                    <FiChevronRight size={24} />
+                </NavButton>
+            </HeaderRow>
 
             <CollapsibleContent $isOpen={isExpanded}>
                 <CollapsibleInner>
