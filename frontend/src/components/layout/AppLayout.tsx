@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { FiEye, FiList, FiSettings } from 'react-icons/fi';
 
 import { useTranslation } from 'react-i18next';
@@ -23,7 +23,7 @@ const BottomNav = styled.nav`
   transform: translateX(-50%);
   width: max-content;
   min-width: 320px;
-  height: 56px;
+  height: 58px;
   background: rgba(23, 23, 23, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -33,7 +33,7 @@ const BottomNav = styled.nav`
   justify-content: space-around;
   align-items: center;
   z-index: 1000;
-  padding: 0 2px;
+  padding: 0 4px;
   gap: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 `;
@@ -49,9 +49,10 @@ const NavItem = styled(NavLink)`
   padding: 8px 24px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 48px;
+  position: relative;
+  z-index: 1;
 
   &.active {
-    background: rgba(255, 255, 255, 0.1);
     color: ${({ theme }) => theme.colors.textPrimary};
   }
 
@@ -67,15 +68,46 @@ const NavItem = styled(NavLink)`
   }
 `;
 
+const ActivePill = styled.div`
+  position: absolute;
+  top: 4px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+  pointer-events: none;
+`;
+
 export const AppLayout: React.FC = () => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const navRef = useRef<HTMLElement>(null);
+  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
+
+  useEffect(() => {
+    // Timeout to allow DOM to render and fonts/translations to apply
+    const timer = setTimeout(() => {
+      if (!navRef.current) return;
+      const activeEl = navRef.current.querySelector('.active') as HTMLElement;
+      if (activeEl) {
+        setPillStyle({
+          left: activeEl.offsetLeft,
+          width: activeEl.offsetWidth,
+          opacity: 1
+        });
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [location.pathname, t]);
 
   return (
     <LayoutContainer>
       <ContentWrapper>
         <Outlet />
       </ContentWrapper>
-      <BottomNav>
+      <BottomNav ref={navRef}>
+        <ActivePill style={pillStyle} />
         <NavItem to="/dashboard" end>
           <FiEye size={32} />
           <span>{t('common.overview')}</span>
