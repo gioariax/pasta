@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FiBarChart2 } from 'react-icons/fi';
+import { DateSelector } from '../components/DateSelector';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -14,7 +15,7 @@ const Header = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
 `;
 
 const Title = styled.h1`
@@ -31,7 +32,8 @@ const Charts: React.FC = () => {
       <Header>
         <Title><FiBarChart2 /> Charts</Title>
       </Header>
-      <p>Analytical charts will go here.</p>
+      <DateSelector />
+      <p style={{ marginTop: '16px' }}>Analytical charts will go here.</p>
     </Container>
   );
 };

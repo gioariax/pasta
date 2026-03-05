@@ -5,8 +5,8 @@ import { useSettings } from '../contexts/SettingsContext';
 import { fetchTransactions, createTransaction, updateTransaction, deleteTransaction, type Transaction } from '../services/api';
 import { TransactionModal } from '../components/TransactionModal';
 import { IconRenderer } from '../components/IconRenderer';
-import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from '../components/ui/select';
-import { createListCollection } from '@chakra-ui/react';
+import { DateSelector } from '../components/DateSelector';
+import { useDateContext } from '../contexts/DateContext';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -19,12 +19,7 @@ const Container = styled.div`
   margin: 0 auto;
 `;
 
-const FilterContainer = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-  align-items: center;
-`;
+
 
 const Header = styled.header`
   display: flex;
@@ -102,23 +97,12 @@ const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
 };
 
-const MONTHS = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-];
-
-const monthCollection = createListCollection({
-    items: MONTHS.map((m, idx) => ({ label: m, value: String(idx) }))
-});
 
 const Transactions: React.FC = () => {
     const { categories } = useSettings();
+    const { selectedMonth, selectedYear } = useDateContext();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isModalOpen, setModalOpen] = useState(false);
-
-    const currentDate = new Date();
-    const [selectedMonth, setSelectedMonth] = useState<number>(currentDate.getMonth());
-    const [selectedYear, setSelectedYear] = useState<number>(currentDate.getFullYear());
 
     useEffect(() => {
         loadTransactions();
@@ -175,12 +159,6 @@ const Transactions: React.FC = () => {
         return txDate.getMonth() === selectedMonth && txDate.getFullYear() === selectedYear;
     });
 
-    const currentYearNum = currentDate.getFullYear();
-    const availableYears = [currentYearNum - 2, currentYearNum - 1, currentYearNum, currentYearNum + 1, currentYearNum + 2];
-
-    const yearCollection = createListCollection({
-        items: availableYears.map(y => ({ label: String(y), value: String(y) }))
-    });
 
     return (
         <Container>
@@ -189,47 +167,7 @@ const Transactions: React.FC = () => {
                 <Button $primary onClick={handleOpenModalForCreate}>+ Add Transaction</Button>
             </Header>
 
-            <FilterContainer>
-                <SelectRoot
-                    size="sm"
-                    width="120px"
-                    collection={yearCollection}
-                    value={[String(selectedYear)]}
-                    onValueChange={(e) => setSelectedYear(Number(e.value[0]))}
-                    variant="subtle"
-                >
-                    <SelectTrigger>
-                        <SelectValueText placeholder="Year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {yearCollection.items.map((item) => (
-                            <SelectItem item={item} key={item.value}>
-                                {item.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </SelectRoot>
-
-                <SelectRoot
-                    size="sm"
-                    width="160px"
-                    collection={monthCollection}
-                    value={[String(selectedMonth)]}
-                    onValueChange={(e) => setSelectedMonth(Number(e.value[0]))}
-                    variant="subtle"
-                >
-                    <SelectTrigger>
-                        <SelectValueText placeholder="Month" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {monthCollection.items.map((item) => (
-                            <SelectItem item={item} key={item.value}>
-                                {item.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </SelectRoot>
-            </FilterContainer>
+            <DateSelector />
 
             <TransactionList>
                 {filteredTransactions.length === 0 && (

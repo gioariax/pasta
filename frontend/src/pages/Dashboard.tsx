@@ -6,6 +6,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { fetchTransactions, createTransaction, type Transaction } from '../services/api';
 import { IconRenderer } from '../components/IconRenderer';
+import { DateSelector } from '../components/DateSelector';
+import { useDateContext } from '../contexts/DateContext';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -129,13 +131,10 @@ const formatCurrency = (amount: number) => {
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
   const { categories } = useSettings();
+  const { selectedMonth, selectedYear } = useDateContext();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [acceptingTemplates, setAcceptingTemplates] = useState<Set<string>>(new Set());
-
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth();
-  const currentYear = currentDate.getFullYear();
 
   useEffect(() => {
     loadTransactions();
@@ -155,14 +154,14 @@ const Dashboard: React.FC = () => {
 
   const currentMonthTransactions = normalTransactions.filter(tx => {
     const txDate = new Date(tx.date);
-    return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
+    return txDate.getMonth() === selectedMonth && txDate.getFullYear() === selectedYear;
   });
 
   // Suggestion Engine based ONLY on current month since overview is locked to "Today/This Month"
   const suggestedTemplates = activeTemplates.filter(template => {
     if (!template.date) return false;
     const tDate = new Date(template.date);
-    const monthsDifference = (currentYear - tDate.getFullYear()) * 12 + (currentMonth - tDate.getMonth());
+    const monthsDifference = (selectedYear - tDate.getFullYear()) * 12 + (selectedMonth - tDate.getMonth());
 
     const interval = template.recurrenceInterval || 1;
     if (monthsDifference >= 0 && monthsDifference % interval === 0) {
@@ -187,7 +186,7 @@ const Dashboard: React.FC = () => {
         category: template.category,
         description: template.description || 'Recurring Transaction',
         type: template.type,
-        date: new Date(currentYear, currentMonth, new Date().getDate()).toISOString(),
+        date: new Date(selectedYear, selectedMonth, new Date().getDate()).toISOString(),
         recurrenceId: template.transactionId,
       };
       await createTransaction(newTx);
@@ -218,6 +217,8 @@ const Dashboard: React.FC = () => {
           <Button onClick={logout}>Sign Out</Button>
         </HeaderActions>
       </Header>
+
+      <DateSelector />
 
       <CardsGrid>
         <SummaryCard>
