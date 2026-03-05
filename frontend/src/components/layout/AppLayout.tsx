@@ -29,6 +29,8 @@ const BottomNav = styled.nav`
   align-items: center;
   z-index: 1000;
   padding-bottom: env(safe-area-inset-bottom, 0px); /* For iOS rounded corners */
+  padding-right: 32px;
+  padding-left: 32px;
 `;
 
 const NavItem = styled(NavLink)`
@@ -58,29 +60,29 @@ const NavItem = styled(NavLink)`
 `;
 
 export const AppLayout: React.FC = () => {
-    return (
-        <LayoutContainer>
-            <ContentWrapper>
-                <Outlet />
-            </ContentWrapper>
-            <BottomNav>
-                <NavItem to="/dashboard" end>
-                    <FiHome size={22} />
-                    <span>Overview</span>
-                </NavItem>
-                <NavItem to="/transactions">
-                    <FiList size={22} />
-                    <span>Transactions</span>
-                </NavItem>
-                <NavItem to="/charts">
-                    <FiBarChart2 size={22} />
-                    <span>Charts</span>
-                </NavItem>
-                <NavItem to="/settings">
-                    <FiSettings size={22} />
-                    <span>Settings</span>
-                </NavItem>
-            </BottomNav>
-        </LayoutContainer>
-    );
+  return (
+    <LayoutContainer>
+      <ContentWrapper>
+        <Outlet />
+      </ContentWrapper>
+      <BottomNav>
+        <NavItem to="/dashboard" end>
+          <FiHome size={22} />
+          <span>Overview</span>
+        </NavItem>
+        <NavItem to="/transactions">
+          <FiList size={22} />
+          <span>Transactions</span>
+        </NavItem>
+        <NavItem to="/charts">
+          <FiBarChart2 size={22} />
+          <span>Charts</span>
+        </NavItem>
+        <NavItem to="/settings">
+          <FiSettings size={22} />
+          <span>Settings</span>
+        </NavItem>
+      </BottomNav>
+    </LayoutContainer>
+  );
 };
