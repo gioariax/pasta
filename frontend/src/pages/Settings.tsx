@@ -8,7 +8,11 @@ import { CategoryManager } from '../components/CategoryManager';
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: ${({ theme }) => theme.spacing.xl};
+  padding: ${({ theme }) => theme.spacing.md};
+
+  @media (min-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.xl};
+  }
 `;
 
 const PageHeader = styled.div`

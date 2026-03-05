@@ -9,7 +9,12 @@ import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem }
 import { createListCollection } from '@chakra-ui/react';
 
 const Container = styled.div`
-  padding: ${({ theme }) => theme.spacing.xl};
+  padding: ${({ theme }) => theme.spacing.md};
+  
+  @media (min-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.xl};
+  }
+  
   max-width: 1200px;
   margin: 0 auto;
 `;
@@ -235,7 +240,12 @@ const Transactions: React.FC = () => {
                     return (
                         <TransactionItem key={tx.transactionId || idx} onClick={() => handleOpenModalForEdit(tx)}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                <div style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex' }}>
+                                <div style={{
+                                    padding: '10px',
+                                    background: tx.type === 'income' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)',
+                                    borderRadius: '12px',
+                                    display: 'flex'
+                                }}>
                                     <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
                                 </div>
                                 <TxLeft>

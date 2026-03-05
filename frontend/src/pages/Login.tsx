@@ -15,7 +15,12 @@ const Container = styled.div`
 
 const Card = styled.div`
   ${({ theme }) => theme.utils.glass}
-  padding: ${({ theme }) => theme.spacing.xl};
+  padding: ${({ theme }) => theme.spacing.md};
+
+  @media (min-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.xl};
+  }
+
   border-radius: 16px;
   width: 100%;
   max-width: 400px;

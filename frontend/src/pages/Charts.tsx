@@ -3,7 +3,11 @@ import styled from 'styled-components';
 import { FiBarChart2 } from 'react-icons/fi';
 
 const Container = styled.div`
-  padding: ${({ theme }) => theme.spacing.xl};
+  padding: ${({ theme }) => theme.spacing.md};
+
+  @media (min-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.xl};
+  }
 `;
 
 const Header = styled.header`
@@ -22,14 +26,14 @@ const Title = styled.h1`
 `;
 
 const Charts: React.FC = () => {
-    return (
-        <Container>
-            <Header>
-                <Title><FiBarChart2 /> Charts</Title>
-            </Header>
-            <p>Analytical charts will go here.</p>
-        </Container>
-    );
+  return (
+    <Container>
+      <Header>
+        <Title><FiBarChart2 /> Charts</Title>
+      </Header>
+      <p>Analytical charts will go here.</p>
+    </Container>
+  );
 };
 
 export default Charts;

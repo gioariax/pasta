@@ -8,7 +8,12 @@ import { fetchTransactions, createTransaction, type Transaction } from '../servi
 import { IconRenderer } from '../components/IconRenderer';
 
 const Container = styled.div`
-  padding: ${({ theme }) => theme.spacing.xl};
+  padding: ${({ theme }) => theme.spacing.md};
+  
+  @media (min-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.xl};
+  }
+  
   max-width: 1200px;
   margin: 0 auto;
 `;
