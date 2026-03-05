@@ -8,6 +8,15 @@ import { IconRenderer } from '../components/IconRenderer';
 import { DateSelector } from '../components/DateSelector';
 import { useDateStore } from '../store/dateStore';
 import { useTranslation } from 'react-i18next';
+import {
+    SwipeableList,
+    SwipeableListItem,
+    SwipeAction,
+    TrailingActions,
+    Type as ListType,
+} from 'react-swipeable-list';
+import 'react-swipeable-list/dist/styles.css';
+import { FiTrash2 } from 'react-icons/fi';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -94,6 +103,20 @@ const TxAmount = styled.div<{ $type: 'income' | 'expense' }>`
   color: ${({ theme, $type }) => $type === 'income' ? theme.colors.success : theme.colors.danger};
 `;
 
+const SwipeActionContent = styled.div`
+  background-color: ${({ theme }) => theme.colors.danger};
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 24px;
+  height: 100%;
+  border-radius: 12px;
+  width: 100%;
+  font-weight: 500;
+  gap: 8px;
+`;
+
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
 };
@@ -106,10 +129,6 @@ const Transactions: React.FC = () => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isModalOpen, setModalOpen] = useState(false);
 
-    useEffect(() => {
-        loadTransactions();
-    }, []);
-
     const loadTransactions = async () => {
         try {
             const data = await fetchTransactions();
@@ -118,6 +137,10 @@ const Transactions: React.FC = () => {
             console.error(err);
         }
     };
+
+    useEffect(() => {
+        loadTransactions();
+    }, []);
 
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
@@ -162,6 +185,20 @@ const Transactions: React.FC = () => {
     });
 
 
+    const trailingActions = (tx: Transaction) => (
+        <TrailingActions>
+            <SwipeAction
+                destructive={true}
+                onClick={() => handleDeleteTransaction(tx.transactionId!)}
+            >
+                <SwipeActionContent>
+                    <FiTrash2 size={20} />
+                    {t('common.delete')}
+                </SwipeActionContent>
+            </SwipeAction>
+        </TrailingActions>
+    );
+
     return (
         <Container>
             <Header>
@@ -175,30 +212,39 @@ const Transactions: React.FC = () => {
                 {filteredTransactions.length === 0 && (
                     <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>{t('transactions.noTransactions')}</div>
                 )}
-                {filteredTransactions.map((tx, idx) => {
-                    const catDef = categories.find(c => c.name === tx.category);
-                    return (
-                        <TransactionItem key={tx.transactionId || idx} onClick={() => handleOpenModalForEdit(tx)}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                <div style={{
-                                    padding: '10px',
-                                    background: tx.type === 'income' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)',
-                                    borderRadius: '12px',
-                                    display: 'flex'
-                                }}>
-                                    <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
-                                </div>
-                                <TxLeft>
-                                    <TxTitle>{tx.category}</TxTitle>
-                                    <TxSubtitle>{tx.description || new Date(tx.date).toLocaleDateString()}</TxSubtitle>
-                                </TxLeft>
-                            </div>
-                            <TxAmount $type={tx.type}>
-                                {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                            </TxAmount>
-                        </TransactionItem>
-                    );
-                })}
+                {filteredTransactions.length > 0 && (
+                    <SwipeableList type={ListType.IOS} fullSwipe={true}>
+                        {filteredTransactions.map((tx, idx) => {
+                            const catDef = categories.find(c => c.name === tx.category);
+                            return (
+                                <SwipeableListItem
+                                    key={tx.transactionId || idx}
+                                    trailingActions={trailingActions(tx)}
+                                >
+                                    <TransactionItem style={{ width: '100%' }} onClick={() => handleOpenModalForEdit(tx)}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                            <div style={{
+                                                padding: '10px',
+                                                background: tx.type === 'income' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)',
+                                                borderRadius: '12px',
+                                                display: 'flex'
+                                            }}>
+                                                <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
+                                            </div>
+                                            <TxLeft>
+                                                <TxTitle>{tx.category}</TxTitle>
+                                                <TxSubtitle>{tx.description || new Date(tx.date).toLocaleDateString()}</TxSubtitle>
+                                            </TxLeft>
+                                        </div>
+                                        <TxAmount $type={tx.type}>
+                                            {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                        </TxAmount>
+                                    </TransactionItem>
+                                </SwipeableListItem>
+                            );
+                        })}
+                    </SwipeableList>
+                )}
             </TransactionList>
 
             <TransactionModal
