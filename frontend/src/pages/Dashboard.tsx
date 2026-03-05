@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FiHome } from 'react-icons/fi';
-import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { fetchTransactions, createTransaction, type Transaction } from '../services/api';
 import { IconRenderer } from '../components/IconRenderer';
@@ -34,11 +33,6 @@ const Title = styled.h1`
   display: flex;
   align-items: center;
   gap: 12px;
-`;
-
-const HeaderActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
 `;
 
 const Button = styled.button<{ $primary?: boolean }>`
@@ -131,7 +125,6 @@ const formatCurrency = (amount: number) => {
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
-  const { logout } = useAuth();
   const { categories } = useSettings();
   const { selectedMonth, selectedYear } = useDateStore();
   const navigate = useNavigate();
@@ -215,9 +208,6 @@ const Dashboard: React.FC = () => {
     <Container>
       <Header>
         <Title><FiHome /> {t('common.overview')}</Title>
-        <HeaderActions>
-          <Button onClick={logout}>{t('layout.signOut')}</Button>
-        </HeaderActions>
       </Header>
 
       <DateSelector />

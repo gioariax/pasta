@@ -105,6 +105,11 @@ const Templates: React.FC<TemplatesProps> = ({ hideHeader }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<Transaction | null>(null);
 
+  useEffect(() => {
+    // eslint-disable-next-line
+    loadTransactions();
+  }, []);
+
   const loadTransactions = async () => {
     try {
       const data = await fetchTransactions();
@@ -113,10 +118,6 @@ const Templates: React.FC<TemplatesProps> = ({ hideHeader }) => {
       console.error(err);
     }
   };
-
-  useEffect(() => {
-    loadTransactions();
-  }, []);
 
   const handleOpenModalForEdit = (tx: Transaction) => {
     setEditingTemplate(tx);

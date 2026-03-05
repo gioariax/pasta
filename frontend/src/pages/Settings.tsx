@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Tabs } from '@chakra-ui/react';
-import { FiSettings, FiRepeat, FiGrid, FiGlobe } from 'react-icons/fi';
+import { FiSettings, FiRepeat, FiGrid, FiGlobe, FiLogOut } from 'react-icons/fi';
+import { useAuth } from '../contexts/AuthContext';
 import Templates from './Templates';
 import { CategoryManager } from '../components/CategoryManager';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +34,23 @@ const PageHeader = styled.div`
   }
 `;
 
+const Button = styled.button<{ $primary?: boolean }>`
+  padding: 8px 16px;
+  background-color: ${({ theme, $primary }) => $primary ? theme.colors.primary : 'rgba(255, 255, 255, 0.1)'};
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+
+  &:hover {
+    background-color: ${({ theme, $primary }) => $primary ? theme.colors.primaryHover : 'rgba(255, 255, 255, 0.2)'};
+  }
+`;
+
 
 
 const LanguageContainer = styled.div`
@@ -54,6 +72,7 @@ const langCollection = createListCollection({
 
 const Settings: React.FC = () => {
     const { t, i18n } = useTranslation();
+    const { logout } = useAuth();
 
     const changeLanguage = (lng: string) => {
         i18n.changeLanguage(lng);
@@ -63,6 +82,16 @@ const Settings: React.FC = () => {
         <Container>
             <PageHeader>
                 <h1><FiSettings /> {t('common.settings')}</h1>
+                <Button
+                    onClick={logout}
+                    style={{
+                        color: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        border: '1px solid rgba(239, 68, 68, 0.2)'
+                    }}
+                >
+                    <FiLogOut /> {t('layout.signOut')}
+                </Button>
             </PageHeader>
 
             <LanguageContainer>

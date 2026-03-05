@@ -27,7 +27,7 @@
         "viewAllTransactions": "Ver Todas las Transacciones"
     },
     "transactions": {
-        "addTransaction": "+ Agregar Transacción",
+        "addTransaction": "+ Nueva Transacción",
         "year": "Año",
         "month": "Mes",
         "noTransactions": "No se encontraron transacciones para este período"

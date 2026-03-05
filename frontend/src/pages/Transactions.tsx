@@ -129,6 +129,11 @@ const Transactions: React.FC = () => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isModalOpen, setModalOpen] = useState(false);
 
+    useEffect(() => {
+        // eslint-disable-next-line
+        loadTransactions();
+    }, []);
+
     const loadTransactions = async () => {
         try {
             const data = await fetchTransactions();
@@ -137,10 +142,6 @@ const Transactions: React.FC = () => {
             console.error(err);
         }
     };
-
-    useEffect(() => {
-        loadTransactions();
-    }, []);
 
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
@@ -203,10 +204,11 @@ const Transactions: React.FC = () => {
         <Container>
             <Header>
                 <Title><FiList /> {t('common.transactions')}</Title>
-                <Button $primary onClick={handleOpenModalForCreate}>{t('transactions.addTransaction')}</Button>
             </Header>
 
             <DateSelector />
+
+            <Button $primary onClick={handleOpenModalForCreate}>{t('transactions.addTransaction')}</Button>
 
             <TransactionList>
                 {filteredTransactions.length === 0 && (
