@@ -46,7 +46,8 @@
         "categoryNamePlaceholder": "E.g., Utilities",
         "selectIcon": "Select Icon",
         "saveCategory": "Save Category",
-        "deleteCategoryConfirm": "Are you sure you want to delete this category? Past transactions with this category will remain unaffected but it will no longer be available for new transactions."
+        "deleteCategoryConfirm": "Are you sure you want to delete this category? Past transactions with this category will remain unaffected but it will no longer be available for new transactions.",
+        "language": "Language"
     },
     "templates": {
         "manageTemplates": "Manage Templates",

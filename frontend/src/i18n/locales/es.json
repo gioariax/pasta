@@ -46,7 +46,8 @@
         "categoryNamePlaceholder": "Ej., Servicios",
         "selectIcon": "Seleccionar Icono",
         "saveCategory": "Guardar Categoría",
-        "deleteCategoryConfirm": "¿Estás seguro de querer eliminar esta categoría? Las transacciones pasadas no se verán afectadas, pero ya no estará disponible para nuevas transacciones."
+        "deleteCategoryConfirm": "¿Estás seguro de querer eliminar esta categoría? Las transacciones pasadas no se verán afectadas, pero ya no estará disponible para nuevas transacciones.",
+        "language": "Idioma"
     },
     "templates": {
         "manageTemplates": "Administrar Plantillas",

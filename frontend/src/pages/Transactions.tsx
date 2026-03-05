@@ -29,8 +29,6 @@ const Container = styled.div`
   margin: 0 auto;
 `;
 
-
-
 const Header = styled.header`
   display: flex;
   justify-content: space-between;
@@ -64,6 +62,10 @@ const TransactionList = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.sm};
+
+  .swipeable-list-item {
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
 const TransactionItem = styled.div`
@@ -115,6 +117,25 @@ const SwipeActionContent = styled.div`
   width: 100%;
   font-weight: 500;
   gap: 8px;
+`;
+
+const TxLeftContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const TxIconContainer = styled.div<{ $type: 'income' | 'expense' }>`
+  padding: 10px;
+  background: ${({ $type }) => $type === 'income' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)'};
+  border-radius: 12px;
+  display: flex;
+`;
+
+const NoTransactionsMessage = styled.div`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  text-align: center;
+  padding: 2rem;
 `;
 
 const formatCurrency = (amount: number) => {
@@ -212,7 +233,7 @@ const Transactions: React.FC = () => {
 
             <TransactionList>
                 {filteredTransactions.length === 0 && (
-                    <div style={{ color: '#a3a3a3', textAlign: 'center', padding: '2rem' }}>{t('transactions.noTransactions')}</div>
+                    <NoTransactionsMessage>{t('transactions.noTransactions')}</NoTransactionsMessage>
                 )}
                 {filteredTransactions.length > 0 && (
                     <SwipeableList type={ListType.IOS} fullSwipe={true}>
@@ -224,20 +245,15 @@ const Transactions: React.FC = () => {
                                     trailingActions={trailingActions(tx)}
                                 >
                                     <TransactionItem style={{ width: '100%' }} onClick={() => handleOpenModalForEdit(tx)}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                            <div style={{
-                                                padding: '10px',
-                                                background: tx.type === 'income' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)',
-                                                borderRadius: '12px',
-                                                display: 'flex'
-                                            }}>
+                                        <TxLeftContent>
+                                            <TxIconContainer $type={tx.type}>
                                                 <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
-                                            </div>
+                                            </TxIconContainer>
                                             <TxLeft>
                                                 <TxTitle>{tx.category}</TxTitle>
                                                 <TxSubtitle>{tx.description || new Date(tx.date).toLocaleDateString()}</TxSubtitle>
                                             </TxLeft>
-                                        </div>
+                                        </TxLeftContent>
                                         <TxAmount $type={tx.type}>
                                             {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                                         </TxAmount>

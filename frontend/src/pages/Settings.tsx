@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Tabs } from '@chakra-ui/react';
-import { FiSettings, FiRepeat, FiGrid, FiGlobe, FiLogOut } from 'react-icons/fi';
+import { FiSettings, FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import Templates from './Templates';
 import { CategoryManager } from '../components/CategoryManager';
@@ -47,20 +46,59 @@ const Button = styled.button<{ $primary?: boolean }>`
   transition: background 0.2s;
 
   &:hover {
-    background-color: ${({ theme, $primary }) => $primary ? theme.colors.primaryHover : 'rgba(255, 255, 255, 0.2)'};
+    background-color: ${({ theme, $primary }) => ($primary ? theme.colors.primaryHover : 'rgba(255, 255, 255, 0.2)')};
   }
 `;
 
-
-
 const LanguageContainer = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
   padding: ${({ theme }) => theme.spacing.lg};
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
+`;
+
+const LanguageLabel = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font-size: 18px;
+  font-weight: 600;
+`;
+
+const SectionButton = styled.button`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${({ theme }) => theme.spacing.lg};
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 12px;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+`;
+
+const CollapsibleContent = styled.div<{ $isOpen: boolean }>`
+  display: grid;
+  grid-template-rows: ${({ $isOpen }) => ($isOpen ? '1fr' : '0fr')};
+  transition: grid-template-rows 0.3s ease-in-out;
+  margin-bottom: ${({ theme, $isOpen }) => ($isOpen ? theme.spacing.xl : theme.spacing.sm)};
+`;
+
+const CollapsibleInner = styled.div`
+  overflow: hidden;
 `;
 
 const langCollection = createListCollection({
@@ -73,6 +111,11 @@ const langCollection = createListCollection({
 const Settings: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { logout } = useAuth();
+    const [openSection, setOpenSection] = useState<'categories' | 'recurring' | null>(null);
+
+    const toggleSection = (section: 'categories' | 'recurring') => {
+        setOpenSection(prev => prev === section ? null : section);
+    };
 
     const changeLanguage = (lng: string) => {
         i18n.changeLanguage(lng);
@@ -95,10 +138,10 @@ const Settings: React.FC = () => {
             </PageHeader>
 
             <LanguageContainer>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#a3a3a3' }}>
+                <LanguageLabel>
                     <FiGlobe size={20} />
-                    <span>Language / Idioma:</span>
-                </div>
+                    <span>{t('settings.language')}</span>
+                </LanguageLabel>
                 <SelectRoot
                     size="md"
                     width="160px"
@@ -120,24 +163,31 @@ const Settings: React.FC = () => {
                 </SelectRoot>
             </LanguageContainer>
 
-            <Tabs.Root defaultValue="categories" variant="enclosed" fitted>
-                <Tabs.List bg="rgba(0,0,0,0.2)">
-                    <Tabs.Trigger value="categories">
+            <div>
+                <SectionButton onClick={() => toggleSection('categories')}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <FiGrid /> {t('settings.categories')}
-                    </Tabs.Trigger>
-                    <Tabs.Trigger value="recurring">
+                    </span>
+                    {openSection === 'categories' ? <FiChevronUp /> : <FiChevronDown />}
+                </SectionButton>
+                <CollapsibleContent $isOpen={openSection === 'categories'}>
+                    <CollapsibleInner>
+                        <CategoryManager />
+                    </CollapsibleInner>
+                </CollapsibleContent>
+
+                <SectionButton onClick={() => toggleSection('recurring')}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <FiRepeat /> {t('settings.recurringTransactions')}
-                    </Tabs.Trigger>
-                </Tabs.List>
-
-                <Tabs.Content value="categories" p={6}>
-                    <CategoryManager />
-                </Tabs.Content>
-
-                <Tabs.Content value="recurring" p={6}>
-                    <Templates hideHeader={true} />
-                </Tabs.Content>
-            </Tabs.Root>
+                    </span>
+                    {openSection === 'recurring' ? <FiChevronUp /> : <FiChevronDown />}
+                </SectionButton>
+                <CollapsibleContent $isOpen={openSection === 'recurring'}>
+                    <CollapsibleInner>
+                        <Templates hideHeader={true} />
+                    </CollapsibleInner>
+                </CollapsibleContent>
+            </div>
         </Container>
     );
 };
