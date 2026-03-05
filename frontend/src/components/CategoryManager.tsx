@@ -16,6 +16,7 @@ const POPULAR_ICONS = [
 ];
 
 const Container = styled.div`
+  margin-top: ${({ theme }) => theme.spacing.md};
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.lg};
@@ -288,7 +289,6 @@ export const CategoryManager: React.FC = () => {
     return (
         <Container>
             <HeaderContainer>
-                <h2 style={{ fontSize: '20px', fontWeight: 600 }}>{t('settings.manageCategories')}</h2>
                 {!isAddingMode && (
                     <Button $primary onClick={handleAddClick}>
                         <FiPlus /> {t('settings.newCategory')}
