@@ -52,7 +52,7 @@ const Input = styled.input`
 const Button = styled.button`
   width: 100%;
   padding: 16px;
-  background-color: #5ef093;
+  background-color: #05D5AD;
   color: #000000;
   border-radius: 8px;
   font-size: 18px;
@@ -76,7 +76,7 @@ const BottomText = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
 
   a {
-    color: #5ef093;
+    color: #05D5AD;
     &:hover {
       text-decoration: underline;
     }
