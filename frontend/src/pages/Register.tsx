@@ -8,7 +8,7 @@ import pastaLogo from '../assets/pastalogo.svg';
 const Container = styled.div`
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: start;
   height: 100vh;
   background-color: #111111;
 `;
@@ -93,14 +93,9 @@ const LogoContainer = styled.div`
   margin-bottom: 16px;
 `;
 
-const ColoredLogo = styled.div`
-  background-color: #5ef093;
-  mask: url(${pastaLogo}) no-repeat center;
-  mask-size: contain;
-  -webkit-mask: url(${pastaLogo}) no-repeat center;
-  -webkit-mask-size: contain;
+const Logo = styled.img`
   width: 200px;
-  height: 60px;
+  height: auto;
 `;
 
 const Register: React.FC = () => {
@@ -150,7 +145,7 @@ const Register: React.FC = () => {
     <Container>
       <Card>
         <LogoContainer>
-          <ColoredLogo title="Pasta Logo" />
+          <Logo src={pastaLogo} alt="Pasta Logo" />
         </LogoContainer>
         <Title>{step === 'register' ? t('auth.createAccount') : t('auth.verifyEmail')}</Title>
         {success && <SuccessText>{success}</SuccessText>}
