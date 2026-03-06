@@ -16,7 +16,8 @@ const Container = styled.div`
 const Card = styled.div`
   background: #161616;
   padding: 40px 32px;
-  border-radius: 24px;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
   width: 100%;
   max-width: 400px;
   display: flex;
