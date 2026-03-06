@@ -19,7 +19,7 @@ const Card = styled.div`
   border-bottom-left-radius: 24px;
   border-bottom-right-radius: 24px;
   width: 100%;
-  max-width: 400px;
+  max-width: 480px;
   display: flex;
   flex-direction: column;
   gap: 24px;
