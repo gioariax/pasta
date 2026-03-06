@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { FiList } from 'react-icons/fi';
 import { useSettings } from '../contexts/SettingsContext';
 import { fetchTransactions, createTransaction, updateTransaction, deleteTransaction, type Transaction } from '../services/api';
 import { TransactionModal } from '../components/TransactionModal';
@@ -102,7 +101,7 @@ const TxSubtitle = styled.div`
 const TxAmount = styled.div<{ $type: 'income' | 'expense' }>`
   font-weight: 600;
   font-size: 16px;
-  color: ${({ theme, $type }) => $type === 'income' ? theme.colors.success : theme.colors.danger};
+  color: ${({ theme, $type }) => $type === 'income' ? theme.colors.success : theme.colors.textPrimary};
 `;
 
 const SwipeActionContent = styled.div`
@@ -223,9 +222,7 @@ const Transactions: React.FC = () => {
 
     return (
         <Container>
-            <Header>
-                <Title><FiList /> {t('common.transactions')}</Title>
-            </Header>
+            <Header />
 
             <DateSelector />
 
@@ -250,8 +247,8 @@ const Transactions: React.FC = () => {
                                                 <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
                                             </TxIconContainer>
                                             <TxLeft>
-                                                <TxTitle>{tx.category}</TxTitle>
-                                                <TxSubtitle>{tx.description || new Date(tx.date).toLocaleDateString()}</TxSubtitle>
+                                                <TxTitle>{tx.description || tx.category}</TxTitle>
+                                                <TxSubtitle>{tx.description ? tx.category : new Date(tx.date).toLocaleDateString()}</TxSubtitle>
                                             </TxLeft>
                                         </TxLeftContent>
                                         <TxAmount $type={tx.type}>

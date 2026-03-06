@@ -7,7 +7,7 @@ export const theme = {
         textPrimary: '#ffffff',
         textSecondary: '#a3a3a3',
         success: '#10b981',
-        danger: '#f43f5e',
+        danger: '#ff6882',
         border: 'transparent',
     },
     spacing: {

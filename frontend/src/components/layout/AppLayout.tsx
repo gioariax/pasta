@@ -43,7 +43,7 @@ const NavItem = styled(NavLink)`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: ${({ theme }) => theme.colors.textSecondary};
+  color: ${({ theme }) => theme.colors.textPrimary};
   text-decoration: none;
   border-radius: 24px;
   padding: 8px 24px;
@@ -53,7 +53,7 @@ const NavItem = styled(NavLink)`
   z-index: 1;
 
   &.active {
-    color: ${({ theme }) => theme.colors.textPrimary};
+    color: ${({ theme }) => theme.colors.primary};
   }
 
   &:hover:not(.active) {

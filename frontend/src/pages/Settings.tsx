@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FiSettings, FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import Templates from './Templates';
 import { CategoryManager } from '../components/CategoryManager';
@@ -124,7 +124,7 @@ const Settings: React.FC = () => {
     return (
         <Container>
             <PageHeader>
-                <h1><FiSettings /> {t('common.settings')}</h1>
+                <div />
                 <Button
                     onClick={logout}
                     style={{

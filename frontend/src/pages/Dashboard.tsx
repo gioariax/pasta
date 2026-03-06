@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FiHome } from 'react-icons/fi';
 import { useSettings } from '../contexts/SettingsContext';
 import { fetchTransactions, createTransaction, type Transaction } from '../services/api';
 import { IconRenderer } from '../components/IconRenderer';
@@ -116,7 +115,7 @@ const TxSubtitle = styled.div`
 const TxAmount = styled.div<{ $type: 'income' | 'expense' }>`
   font-weight: 600;
   font-size: 16px;
-  color: ${({ theme, $type }) => $type === 'income' ? theme.colors.success : theme.colors.danger};
+  color: ${({ theme, $type }) => $type === 'income' ? theme.colors.success : theme.colors.textPrimary};
 `;
 
 const formatCurrency = (amount: number) => {
@@ -206,9 +205,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <Container>
-      <Header>
-        <Title><FiHome /> {t('common.overview')}</Title>
-      </Header>
+      <Header />
 
       <DateSelector />
 
@@ -246,9 +243,10 @@ const Dashboard: React.FC = () => {
                       <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color="#3b82f6" />
                     </div>
                     <TxLeft>
-                      <TxTitle>{template.category}</TxTitle>
+                      <TxTitle>{template.description || template.category}</TxTitle>
                       <TxSubtitle>
-                        {template.recurrenceInterval === 1 ? t('templates.intervalMonthly') : t('templates.intervalMonths', { count: template.recurrenceInterval })} - {template.description}
+                        {template.description ? template.category : ''} {template.description ? '• ' : ''}
+                        {template.recurrenceInterval === 1 ? t('templates.intervalMonthly') : t('templates.intervalMonths', { count: template.recurrenceInterval })}
                       </TxSubtitle>
                     </TxLeft>
                   </div>

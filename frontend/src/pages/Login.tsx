@@ -66,7 +66,7 @@ const Button = styled.button`
 
 const ErrorText = styled.div`
   color: ${({ theme }) => theme.colors.danger};
-  font-size: 14px;
+  font-size: 16px;
   text-align: center;
 `;
 
