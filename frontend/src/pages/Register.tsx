@@ -3,42 +3,38 @@ import styled from 'styled-components';
 import { signUp, confirmRegistration } from '../services/cognito';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import pastaLogo from '../assets/pastalogo.svg';
 
 const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: ${({ theme }) => theme.colors.background};
+  background-color: #111111;
 `;
 
 const Card = styled.div`
-  ${({ theme }) => theme.utils.glass}
-  padding: ${({ theme }) => theme.spacing.md};
-
-  @media (min-width: 768px) {
-    padding: ${({ theme }) => theme.spacing.xl};
-  }
-
-  border-radius: 16px;
+  background: #161616;
+  padding: 40px 32px;
+  border-radius: 24px;
   width: 100%;
   max-width: 400px;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.lg};
+  gap: 24px;
 `;
 
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 600;
   text-align: center;
-  margin-bottom: ${({ theme }) => theme.spacing.md};
+  margin-bottom: 8px;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  background: #2b2b2b;
   border: none;
   border-radius: 8px;
   color: white;
@@ -47,22 +43,22 @@ const Input = styled.input`
   transition: background 0.2s;
 
   &:focus {
-    background: rgba(255, 255, 255, 0.1);
+    background: #333333;
   }
 `;
 
 const Button = styled.button`
   width: 100%;
-  padding: 12px;
-  background-color: ${({ theme }) => theme.colors.primary};
-  color: white;
+  padding: 16px;
+  background-color: #5ef093;
+  color: #000000;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
-  transition: background 0.2s;
+  transition: filter 0.2s;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.primaryHover};
+    filter: brightness(1.1);
   }
 `;
 
@@ -84,11 +80,27 @@ const BottomText = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
 
   a {
-    color: ${({ theme }) => theme.colors.primary};
+    color: #5ef093;
     &:hover {
       text-decoration: underline;
     }
   }
+`;
+
+const LogoContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+`;
+
+const ColoredLogo = styled.div`
+  background-color: #5ef093;
+  mask: url(${pastaLogo}) no-repeat center;
+  mask-size: contain;
+  -webkit-mask: url(${pastaLogo}) no-repeat center;
+  -webkit-mask-size: contain;
+  width: 200px;
+  height: 60px;
 `;
 
 const Register: React.FC = () => {
@@ -137,6 +149,9 @@ const Register: React.FC = () => {
   return (
     <Container>
       <Card>
+        <LogoContainer>
+          <ColoredLogo title="Pasta Logo" />
+        </LogoContainer>
         <Title>{step === 'register' ? t('auth.createAccount') : t('auth.verifyEmail')}</Title>
         {success && <SuccessText>{success}</SuccessText>}
         {error && <ErrorText>{error}</ErrorText>}
