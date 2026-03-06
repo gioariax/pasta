@@ -131,6 +131,33 @@ const TxIconContainer = styled.div<{ $type: 'income' | 'expense' }>`
   display: flex;
 `;
 
+const DayGroupHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 8px 0;
+`;
+
+const DayCircle = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: ${({ theme }) => theme.colors.textPrimary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+`;
+
+const DayDivider = styled.div`
+  height: 1px;
+  flex-grow: 1;
+  background: rgba(255, 255, 255, 0.05);
+`;
+
 const NoTransactionsMessage = styled.div`
   color: ${({ theme }) => theme.colors.textSecondary};
   text-align: center;
@@ -205,6 +232,16 @@ const Transactions: React.FC = () => {
         return txDate.getMonth() === selectedMonth && txDate.getFullYear() === selectedYear;
     });
 
+    const sortedTransactions = [...filteredTransactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const groupedTransactions = sortedTransactions.reduce((acc, tx) => {
+        const day = new Date(tx.date).getDate().toString().padStart(2, '0');
+        if (!acc[day]) acc[day] = [];
+        acc[day].push(tx);
+        return acc;
+    }, {} as Record<string, Transaction[]>);
+
+    const sortedDays = Object.keys(groupedTransactions).sort((a, b) => parseInt(b) - parseInt(a));
 
     const trailingActions = (tx: Transaction) => (
         <TrailingActions>
@@ -229,37 +266,43 @@ const Transactions: React.FC = () => {
             <Button $primary onClick={handleOpenModalForCreate}>{t('transactions.addTransaction')}</Button>
 
             <TransactionList>
-                {filteredTransactions.length === 0 && (
+                {sortedDays.length === 0 && (
                     <NoTransactionsMessage>{t('transactions.noTransactions')}</NoTransactionsMessage>
                 )}
-                {filteredTransactions.length > 0 && (
-                    <SwipeableList type={ListType.IOS} fullSwipe={true}>
-                        {filteredTransactions.map((tx, idx) => {
-                            const catDef = categories.find(c => c.name === tx.category);
-                            return (
-                                <SwipeableListItem
-                                    key={tx.transactionId || idx}
-                                    trailingActions={trailingActions(tx)}
-                                >
-                                    <TransactionItem style={{ width: '100%' }} onClick={() => handleOpenModalForEdit(tx)}>
-                                        <TxLeftContent>
-                                            <TxIconContainer $type={tx.type}>
-                                                <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
-                                            </TxIconContainer>
-                                            <TxLeft>
-                                                <TxTitle>{tx.description || tx.category}</TxTitle>
-                                                <TxSubtitle>{tx.description ? tx.category : new Date(tx.date).toLocaleDateString()}</TxSubtitle>
-                                            </TxLeft>
-                                        </TxLeftContent>
-                                        <TxAmount $type={tx.type}>
-                                            {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                                        </TxAmount>
-                                    </TransactionItem>
-                                </SwipeableListItem>
-                            );
-                        })}
-                    </SwipeableList>
-                )}
+                {sortedDays.map(day => (
+                    <div key={day}>
+                        <DayGroupHeader>
+                            <DayCircle>{day}</DayCircle>
+                            <DayDivider />
+                        </DayGroupHeader>
+                        <SwipeableList type={ListType.IOS} fullSwipe={true}>
+                            {groupedTransactions[day].map((tx, idx) => {
+                                const catDef = categories.find(c => c.name === tx.category);
+                                return (
+                                    <SwipeableListItem
+                                        key={tx.transactionId || idx}
+                                        trailingActions={trailingActions(tx)}
+                                    >
+                                        <TransactionItem style={{ width: '100%' }} onClick={() => handleOpenModalForEdit(tx)}>
+                                            <TxLeftContent>
+                                                <TxIconContainer $type={tx.type}>
+                                                    <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
+                                                </TxIconContainer>
+                                                <TxLeft>
+                                                    <TxTitle>{tx.description || tx.category}</TxTitle>
+                                                    <TxSubtitle>{tx.description ? tx.category : new Date(tx.date).toLocaleDateString()}</TxSubtitle>
+                                                </TxLeft>
+                                            </TxLeftContent>
+                                            <TxAmount $type={tx.type}>
+                                                {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                            </TxAmount>
+                                        </TransactionItem>
+                                    </SwipeableListItem>
+                                );
+                            })}
+                        </SwipeableList>
+                    </div>
+                ))}
             </TransactionList>
 
             <TransactionModal
