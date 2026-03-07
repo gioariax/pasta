@@ -467,9 +467,9 @@ const Dashboard: React.FC = () => {
           <CardValue $type="expense">-{formatCurrency(expense)}</CardValue>
         </SummaryCard>
         {suggestedTemplates.filter(t => t.type === 'expense').length > 0 && (
-          <SummaryCard>
-            <CardLabel>{t('dashboard.projectedExpenses')}</CardLabel>
-            <CardValue $type="projected">-{formatCurrency(projectedExpenses)}</CardValue>
+          <SummaryCard $featured>
+            <CardLabel $featured>{t('dashboard.projectedExpenses')}</CardLabel>
+            <CardValue $type="projected" $featured>-{formatCurrency(projectedExpenses)}</CardValue>
           </SummaryCard>
         )}
       </CardsGrid>
@@ -546,11 +546,11 @@ const Dashboard: React.FC = () => {
                         {template.recurrenceInterval === 1 ? t('templates.intervalMonthly') : t('templates.intervalMonths', { count: template.recurrenceInterval })}
                       </SuggestedSubtitle>
                     </TxLeft>
+                  </SuggestedItemLeft>
+                  <SuggestedItemRight>
                     <SuggestedAmount $type={template.type}>
                       {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
                     </SuggestedAmount>
-                  </SuggestedItemLeft>
-                  <SuggestedItemRight>
                     <SuggestedAcceptButton
                       $primary
                       disabled={acceptingTemplates.has(template.transactionId!)}

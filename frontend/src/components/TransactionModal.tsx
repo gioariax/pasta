@@ -181,10 +181,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
   // Handle auto-focus when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Small timeout to ensure modal is rendered and animation has started
+      // AutoFocus triggers viewport scroll anomalies on iOS because the modal is sliding up.
+      // This timeout forces the view to scroll back to the focused element after animation.
       const timer = setTimeout(() => {
-        amountInputRef.current?.focus();
-      }, 100);
+        if (amountInputRef.current) {
+          amountInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 350);
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
