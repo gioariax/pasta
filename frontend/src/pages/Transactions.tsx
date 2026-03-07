@@ -51,6 +51,24 @@ const Button = styled.button<{ $primary?: boolean }>`
   }
 `;
 
+const AddButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+`;
+
+const AddTransactionButton = styled(Button)`
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 12px;
+  
+  @media (min-width: 768px) {
+    width: auto;
+    padding: 12px 32px;
+  }
+`;
+
 const TransactionList = styled.div`
   display: flex;
   flex-direction: column;
@@ -257,7 +275,11 @@ const Transactions: React.FC = () => {
 
       <DateSelector />
 
-      <Button $primary onClick={handleOpenModalForCreate}>{t('transactions.addTransaction')}</Button>
+      <AddButtonContainer>
+        <AddTransactionButton $primary onClick={handleOpenModalForCreate}>
+          {t('transactions.addTransaction')}
+        </AddTransactionButton>
+      </AddButtonContainer>
 
       <TransactionList>
         {sortedDays.length === 0 && (
@@ -305,6 +327,7 @@ const Transactions: React.FC = () => {
         onClose={() => setModalOpen(false)}
         onSubmit={handleSaveTransaction}
         onDelete={handleDeleteTransaction}
+        presentation="bottom-sheet"
       />
     </Container>
   );

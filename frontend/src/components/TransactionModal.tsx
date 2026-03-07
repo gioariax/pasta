@@ -13,7 +13,7 @@ interface TransactionModalProps {
   onClose: () => void;
   onSubmit: (transaction: Transaction) => void | Promise<void>;
   onDelete?: (id: string) => void;
-  initialData?: Transaction;
+  initialData?: Transaction | null;
   presentation?: 'center' | 'bottom-sheet';
 }
 

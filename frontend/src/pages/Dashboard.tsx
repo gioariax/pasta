@@ -11,7 +11,7 @@ import { TransactionModal } from '../components/TransactionModal';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
-  padding-bottom: calc(${({ theme }) => theme.spacing.xl} + 84px);
+  padding-bottom: ${({ theme }) => theme.spacing.xl};
   
   @media (min-width: 768px) {
     padding: ${({ theme }) => theme.spacing.xl};
@@ -48,6 +48,24 @@ const Button = styled.button<{ $primary?: boolean }>`
 
   &:hover {
     background-color: ${({ theme, $primary }) => $primary ? theme.colors.primaryHover : 'rgba(255, 255, 255, 0.2)'};
+  }
+`;
+
+const AddButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+`;
+
+const AddTransactionButton = styled(Button)`
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 12px;
+  
+  @media (min-width: 768px) {
+    width: auto;
+    padding: 12px 32px;
   }
 `;
 
@@ -224,21 +242,6 @@ const SuggestedAmount = styled(TxAmount)`
   }
 `;
 
-const FloatingAddButton = styled(Button)`
-  position: fixed;
-  left: ${({ theme }) => theme.spacing.md};
-  right: ${({ theme }) => theme.spacing.md};
-  bottom: calc(${({ theme }) => theme.spacing.md} + env(safe-area-inset-bottom));
-  z-index: 900;
-  width: auto;
-  min-height: 48px;
-  border-radius: 12px;
-
-  @media (min-width: 768px) {
-    display: none;
-  }
-`;
-
 const FooterActions = styled.div`
   margin-top: 32px;
   text-align: center;
@@ -353,6 +356,12 @@ const Dashboard: React.FC = () => {
 
       <DateSelector />
 
+      <AddButtonContainer>
+        <AddTransactionButton $primary onClick={handleOpenModalForCreate}>
+          {t('transactions.addTransaction')}
+        </AddTransactionButton>
+      </AddButtonContainer>
+
       <CardsGrid>
         <SummaryCard $featured>
           <CardLabel $featured>{t('dashboard.currentBalance')}</CardLabel>
@@ -417,10 +426,6 @@ const Dashboard: React.FC = () => {
       <FooterActions>
         <Button $primary onClick={() => navigate('/transactions')}>{t('dashboard.viewAllTransactions')}</Button>
       </FooterActions>
-
-      <FloatingAddButton $primary onClick={handleOpenModalForCreate}>
-        {t('transactions.addTransaction')}
-      </FloatingAddButton>
 
       <TransactionModal
         isOpen={isModalOpen}
