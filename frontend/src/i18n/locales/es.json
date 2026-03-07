@@ -28,6 +28,13 @@
     },
     "transactions": {
         "addTransaction": "+ Nueva Transacción",
+        "editTransaction": "Editar Transacción",
+        "newTransaction": "Añadir Transacción",
+        "amount": "Valor",
+        "selectCategory": "Seleccionar categoría",
+        "descriptionPlaceholder": "Descripción...",
+        "makeRecurring": "Hacer de esta una transacción recurrente",
+        "selectInterval": "Seleccionar intervalo",
         "year": "Año",
         "month": "Mes",
         "noTransactions": "No se encontraron transacciones para este período"
@@ -47,7 +54,10 @@
         "selectIcon": "Seleccionar Icono",
         "saveCategory": "Guardar Categoría",
         "deleteCategoryConfirm": "¿Estás seguro de querer eliminar esta categoría? Las transacciones pasadas no se verán afectadas, pero ya no estará disponible para nuevas transacciones.",
-        "language": "Idioma"
+        "language": "Idioma",
+        "specialTracking": "Seguimiento Especial",
+        "monthlyBudget": "Presupuesto Mensual",
+        "budgetPlaceholder": "Ingresa el presupuesto..."
     },
     "templates": {
         "manageTemplates": "Administrar Plantillas",

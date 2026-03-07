@@ -5,6 +5,7 @@ import type { Category } from '../services/api';
 import { IconRenderer } from './IconRenderer';
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from './ui/select';
+import { Switch } from './ui/switch';
 import { useTranslation } from 'react-i18next';
 import { createListCollection } from '@chakra-ui/react';
 
@@ -81,6 +82,18 @@ const IconBox = styled.div<{ $type: 'income' | 'expense' }>`
 const CatName = styled.div`
   font-weight: 500;
   font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const Badge = styled.span<{ $type?: 'budget' | 'tracking' }>`
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  background: ${({ $type }) => $type === 'budget' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(245, 158, 11, 0.15)'};
+  color: ${({ $type }) => $type === 'budget' ? '#3b82f6' : '#f59e0b'};
 `;
 
 const CatType = styled.div<{ $type: 'income' | 'expense' }>`
@@ -136,6 +149,13 @@ const Input = styled.input`
   }
 `;
 
+const FieldRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+`;
+
 const Label = styled.label`
   display: block;
   margin-bottom: 8px;
@@ -182,7 +202,7 @@ export const CategoryManager: React.FC = () => {
     const handleAddClick = () => {
         setIsAddingMode(true);
         setEditingId(null);
-        setEditForm({ name: '', type: 'expense', icon: 'FiTag' });
+        setEditForm({ name: '', type: 'expense', icon: 'FiTag', isSpecialTracking: false, budget: undefined });
     };
 
     const handleCancel = () => {
@@ -201,7 +221,9 @@ export const CategoryManager: React.FC = () => {
                 id: Date.now().toString(),
                 name: editForm.name,
                 type: editForm.type as 'income' | 'expense',
-                icon: editForm.icon
+                icon: editForm.icon,
+                isSpecialTracking: editForm.isSpecialTracking,
+                budget: editForm.budget
             };
             updatedCategories.push(newCategory);
         } else if (editingId) {
@@ -262,6 +284,32 @@ export const CategoryManager: React.FC = () => {
                     </div>
                 </div>
 
+                {editForm.type === 'expense' && (
+                    <>
+                        <FieldRow>
+                            <Label style={{ marginBottom: 0 }}>{t('settings.specialTracking')}</Label>
+                            <Switch
+                                colorPalette="blue"
+                                checked={!!editForm.isSpecialTracking}
+                                onCheckedChange={(e) => setEditForm({ ...editForm, isSpecialTracking: e.checked, budget: e.checked ? editForm.budget : undefined })}
+                            />
+                        </FieldRow>
+
+                        {editForm.isSpecialTracking && (
+                            <div>
+                                <Label>{t('settings.monthlyBudget')}</Label>
+                                <Input
+                                    type="number"
+                                    inputMode="decimal"
+                                    value={editForm.budget || ''}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm(prev => ({ ...prev, budget: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                                    placeholder={t('settings.budgetPlaceholder')}
+                                />
+                            </div>
+                        )}
+                    </>
+                )}
+
                 <div>
                     <Label>{t('settings.selectIcon')}</Label>
                     <IconsGrid>
@@ -310,7 +358,11 @@ export const CategoryManager: React.FC = () => {
                                         <IconRenderer name={cat.icon} color={cat.type === 'income' ? '#10b981' : '#f43f5e'} />
                                     </IconBox>
                                     <div>
-                                        <CatName>{cat.name}</CatName>
+                                        <CatName>
+                                            {cat.name}
+                                            {cat.isSpecialTracking && <Badge $type="tracking">Tracking</Badge>}
+                                            {cat.budget !== undefined && <Badge $type="budget">Budget: {cat.budget}</Badge>}
+                                        </CatName>
                                         <CatType $type={cat.type}>{cat.type}</CatType>
                                     </div>
                                 </InfoGroup>

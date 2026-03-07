@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp, FiPieChart } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import Templates from './Templates';
 import { CategoryManager } from '../components/CategoryManager';
 import { useTranslation } from 'react-i18next';
 import { createListCollection } from '@chakra-ui/react';
+import { Switch } from '../components/ui/switch';
 import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from '../components/ui/select';
 
 const Container = styled.div`
@@ -111,9 +113,10 @@ const langCollection = createListCollection({
 const Settings: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { logout } = useAuth();
-    const [openSection, setOpenSection] = useState<'categories' | 'recurring' | null>(null);
+    const { dashboardWidgets, saveWidgets } = useSettings();
+    const [openSection, setOpenSection] = useState<'categories' | 'recurring' | 'widgets' | null>(null);
 
-    const toggleSection = (section: 'categories' | 'recurring') => {
+    const toggleSection = (section: 'categories' | 'recurring' | 'widgets') => {
         setOpenSection(prev => prev === section ? null : section);
     };
 
@@ -185,6 +188,51 @@ const Settings: React.FC = () => {
                 <CollapsibleContent $isOpen={openSection === 'recurring'}>
                     <CollapsibleInner>
                         <Templates hideHeader={true} />
+                    </CollapsibleInner>
+                </CollapsibleContent>
+
+                <SectionButton onClick={() => toggleSection('widgets')}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FiPieChart /> {t('settings.dashboardWidgets', 'Dashboard Analytical Charts')}
+                    </span>
+                    {openSection === 'widgets' ? <FiChevronUp /> : <FiChevronDown />}
+                </SectionButton>
+                <CollapsibleContent $isOpen={openSection === 'widgets'}>
+                    <CollapsibleInner style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '12px' }}>
+                        <Switch
+                            checked={dashboardWidgets.expenseDistribution}
+                            onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, expenseDistribution: e.checked })}
+                        >
+                            {t('settings.expenseDistribution', 'Expense Distribution (Donut Chart)')}
+                        </Switch>
+
+                        <Switch
+                            checked={dashboardWidgets.incomeVsExpense}
+                            onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, incomeVsExpense: e.checked })}
+                        >
+                            {t('settings.incomeVsExpense', 'Income vs Expense Trends')}
+                        </Switch>
+
+                        <Switch
+                            checked={dashboardWidgets.burnRate}
+                            onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, burnRate: e.checked })}
+                        >
+                            {t('settings.burnRate', 'Burn Rate vs Budget Constraints')}
+                        </Switch>
+
+                        <Switch
+                            checked={dashboardWidgets.cashFlow}
+                            onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, cashFlow: e.checked })}
+                        >
+                            {t('settings.cashFlow', 'Projected Cash Flow')}
+                        </Switch>
+
+                        <Switch
+                            checked={dashboardWidgets.heatmap}
+                            onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, heatmap: e.checked })}
+                        >
+                            {t('settings.heatmap', 'Expenditure Intensity Heatmap')}
+                        </Switch>
                     </CollapsibleInner>
                 </CollapsibleContent>
             </div>

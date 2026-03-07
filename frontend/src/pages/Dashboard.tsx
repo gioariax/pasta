@@ -8,6 +8,11 @@ import { DateSelector } from '../components/DateSelector';
 import { useDateStore } from '../store/dateStore';
 import { useTranslation } from 'react-i18next';
 import { TransactionModal } from '../components/TransactionModal';
+import { ExpenseDistributionChart } from '../components/charts/ExpenseDistributionChart';
+import { IncomeVsExpenseTrend } from '../components/charts/IncomeVsExpenseTrend';
+import { BurnRateChart } from '../components/charts/BurnRateChart';
+import { ProjectedCashflowChart } from '../components/charts/ProjectedCashflowChart';
+import { ExpenseHeatmapChart } from '../components/charts/ExpenseHeatmapChart';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -119,6 +124,78 @@ const CardValue = styled.span<{ $type?: 'income' | 'expense' | 'projected'; $fea
   @media (min-width: 768px) {
     font-size: 32px;
   }
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`;
+
+const BudgetGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+`;
+
+const ChartsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: ${({ theme }) => theme.spacing.lg};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+`;
+
+const BudgetCard = styled(SummaryCard)`
+  gap: ${({ theme }) => theme.spacing.sm};
+`;
+
+const BudgetHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const BudgetCategory = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+`;
+
+const BudgetAmounts = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  margin-top: 4px;
+`;
+
+const ProgressBarBackground = styled.div`
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+`;
+
+const ProgressBarFill = styled.div<{ $percent: number }>`
+  height: 100%;
+  background: ${({ theme, $percent }) =>
+    $percent >= 100 ? theme.colors.danger :
+      $percent >= 80 ? '#f59e0b' : // yellow-ish
+        theme.colors.success};
+  width: ${({ $percent }) => Math.min($percent, 100)}%;
+  border-radius: 4px;
+  transition: width 0.3s ease, background-color 0.3s ease;
 `;
 
 const TransactionList = styled.div`
@@ -257,7 +334,7 @@ const formatCurrency = (amount: number) => {
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
-  const { categories } = useSettings();
+  const { categories, dashboardWidgets } = useSettings();
   const { selectedMonth, selectedYear } = useDateStore();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -350,6 +427,19 @@ const Dashboard: React.FC = () => {
   const suggestedExpense = suggestedTemplates.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const projectedExpenses = expense + suggestedExpense;
 
+  const trackedCategories = categories.filter(c => c.isSpecialTracking);
+  const budgetsData = trackedCategories.map(cat => {
+    const spent = currentMonthTransactions
+      .filter(tx => tx.category === cat.name && tx.type === 'expense')
+      .reduce((sum, tx) => sum + tx.amount, 0);
+
+    const budget = cat.budget || 0;
+    const isOverBudget = budget > 0 && spent > budget;
+    const percent = budget > 0 ? (spent / budget) * 100 : 0;
+
+    return { ...cat, spent, percent, isOverBudget };
+  });
+
   return (
     <Container>
       <Header />
@@ -382,6 +472,59 @@ const Dashboard: React.FC = () => {
           </SummaryCard>
         )}
       </CardsGrid>
+
+      {/* Render Activated Widgets */}
+      {dashboardWidgets && (
+        <ChartsGrid>
+          {dashboardWidgets.expenseDistribution && (
+            <ExpenseDistributionChart transactions={currentMonthTransactions} />
+          )}
+          {dashboardWidgets.incomeVsExpense && (
+            <IncomeVsExpenseTrend transactions={transactions} />
+          )}
+          {dashboardWidgets.burnRate && (
+            <BurnRateChart transactions={currentMonthTransactions} categories={categories} />
+          )}
+          {dashboardWidgets.cashFlow && (
+            <ProjectedCashflowChart transactions={currentMonthTransactions} suggestedTemplates={suggestedTemplates} />
+          )}
+          {dashboardWidgets.heatmap && (
+            <ExpenseHeatmapChart transactions={currentMonthTransactions} />
+          )}
+        </ChartsGrid>
+      )}
+
+      {budgetsData.length > 0 && (
+        <>
+          <SectionTitle>{t('dashboard.trackedBudgets', 'Presupuestos Seguimiento')}</SectionTitle>
+          <BudgetGrid>
+            {budgetsData.map(data => (
+              <BudgetCard key={data.id}>
+                <BudgetHeader>
+                  <BudgetCategory>
+                    <IconRenderer name={data.icon} size={18} color="#f43f5e" />
+                    {data.name}
+                  </BudgetCategory>
+                  <span style={{ fontWeight: 600, color: data.isOverBudget ? '#ef4444' : undefined }}>
+                    {formatCurrency(data.spent)}
+                  </span>
+                </BudgetHeader>
+                {data.budget !== undefined && data.budget > 0 && (
+                  <>
+                    <ProgressBarBackground>
+                      <ProgressBarFill $percent={data.percent} />
+                    </ProgressBarBackground>
+                    <BudgetAmounts>
+                      <span>{data.percent.toFixed(0)}%</span>
+                      <span>{t('dashboard.ofBudget', 'de')} {formatCurrency(data.budget)}</span>
+                    </BudgetAmounts>
+                  </>
+                )}
+              </BudgetCard>
+            ))}
+          </BudgetGrid>
+        </>
+      )}
 
       {suggestedTemplates.length > 0 && (
         <>

@@ -18,9 +18,19 @@ export const DEFAULT_CATEGORIES: Category[] = [
     { id: '13', name: 'Other Income', type: 'income', icon: 'FiPlus' },
 ];
 
+const DEFAULT_WIDGETS: Record<string, boolean> = {
+    expenseDistribution: true,
+    incomeVsExpense: true,
+    burnRate: true,
+    cashFlow: true,
+    heatmap: true,
+};
+
 interface SettingsContextType {
     categories: Category[];
+    dashboardWidgets: Record<string, boolean>;
     saveCategories: (newCategories: Category[]) => Promise<void>;
+    saveWidgets: (newWidgets: Record<string, boolean>) => Promise<void>;
     loading: boolean;
 }
 
@@ -28,6 +38,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+    const [dashboardWidgets, setDashboardWidgets] = useState<Record<string, boolean>>(DEFAULT_WIDGETS);
     const [loading, setLoading] = useState(true);
     const { isAuthenticated } = useAuth();
 
@@ -48,10 +59,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             } else {
                 setCategories(DEFAULT_CATEGORIES);
             }
+            if (data.dashboardWidgets) {
+                setDashboardWidgets({ ...DEFAULT_WIDGETS, ...data.dashboardWidgets });
+            } else {
+                setDashboardWidgets(DEFAULT_WIDGETS);
+            }
         } catch (error) {
             console.error('Failed to load settings', error);
             // Fallback to default
             setCategories(DEFAULT_CATEGORIES);
+            setDashboardWidgets(DEFAULT_WIDGETS);
         } finally {
             setLoading(false);
         }
@@ -60,15 +77,24 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const saveCategories = async (newCategories: Category[]) => {
         try {
             setCategories(newCategories); // Optimistic UI update
-            await updateSettings({ categories: newCategories });
+            await updateSettings({ categories: newCategories, dashboardWidgets });
         } catch (error) {
             console.error('Failed to save settings', error);
             // Rollback on failure could be implemented here
         }
     };
 
+    const saveWidgets = async (newWidgets: Record<string, boolean>) => {
+        try {
+            setDashboardWidgets(newWidgets);
+            await updateSettings({ categories, dashboardWidgets: newWidgets });
+        } catch (error) {
+            console.error('Failed to save settings widgets', error);
+        }
+    };
+
     return (
-        <SettingsContext.Provider value={{ categories, saveCategories, loading }}>
+        <SettingsContext.Provider value={{ categories, dashboardWidgets, saveCategories, saveWidgets, loading }}>
             {children}
         </SettingsContext.Provider>
     );

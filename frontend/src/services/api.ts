@@ -21,10 +21,13 @@ export interface Category {
     name: string;
     type: 'income' | 'expense';
     icon: string;
+    isSpecialTracking?: boolean;
+    budget?: number;
 }
 
 export interface UserSettings {
     categories: Category[];
+    dashboardWidgets?: Record<string, boolean>;
 }
 
 

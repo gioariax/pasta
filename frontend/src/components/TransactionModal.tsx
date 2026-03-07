@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useState, useRef, useEffect } from 'react';
+import styled, { keyframes, css } from 'styled-components';
 import { Input, parseDate, createListCollection } from '@chakra-ui/react';
 import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from './ui/select';
 import { SegmentedControl } from './ui/segmented-control';
@@ -7,6 +7,7 @@ import { Switch } from './ui/switch';
 import { DatePickerRoot, DatePickerControl, DatePickerInput } from './ui/date-picker';
 import { formatDateAsDdSlashMMSlashYyyy, parseDdSlashMMSlashYyyyToDateValue } from '../lib/date';
 import type { Transaction } from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -46,6 +47,15 @@ const Overlay = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
   }
 `;
 
+const slideUp = keyframes`
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+`;
+
 const ModalContent = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
   ${({ theme }) => theme.utils.glass}
   background: ${({ theme }) => theme.colors.surface};
@@ -58,14 +68,17 @@ const ModalContent = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
   gap: ${({ theme }) => theme.spacing.lg};
 
   @media (max-width: 767px) {
-    ${({ $presentation, theme }) => $presentation === 'bottom-sheet' ? `
+    ${({ $presentation, theme }) => $presentation === 'bottom-sheet' ? css`
       max-width: none;
       width: 100vw;
       height: 90vh;
       border-radius: 16px 16px 0 0;
       padding: ${theme.spacing.lg};
       overflow-y: auto;
-    ` : ''}
+      animation: ${slideUp} 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    ` : css`
+      animation: ${slideUp} 0.2s ease-out forwards;
+    `}
   }
 `;
 
@@ -117,6 +130,7 @@ const DeleteButton = styled(Button)`
 
 export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, initialData, onSubmit, onDelete, presentation = 'center' }) => {
   const { categories: allCategories } = useSettings();
+  const { t } = useTranslation();
   const [type, setType] = useState<'income' | 'expense'>('expense');
 
   const currentCategories = allCategories.filter(c => c.type === type).map(c => c.name);
@@ -129,6 +143,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
 
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrenceInterval, setRecurrenceInterval] = useState(1);
+
+  const amountInputRef = useRef<HTMLInputElement>(null);
 
   // Pre-populate fields on open
   React.useEffect(() => {
@@ -154,13 +170,24 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
   }, [allCategories, isOpen, initialData]);
 
   // Update category automatically if type changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!initialData || type !== initialData.type) {
       if (currentCategories.length > 0 && !currentCategories.includes(category)) {
         setCategory(currentCategories[0]);
       }
     }
   }, [type, initialData, currentCategories, category]);
+
+  // Handle auto-focus when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      // Small timeout to ensure modal is rendered and animation has started
+      const timer = setTimeout(() => {
+        amountInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -188,15 +215,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
   return (
     <Overlay $presentation={presentation}>
       <ModalContent $presentation={presentation}>
-        <Title>{initialData ? 'Edit Transaction' : 'Add Transaction'}</Title>
+        <Title>{initialData ? t('transactions.editTransaction') : t('transactions.newTransaction')}</Title>
         <Form onSubmit={handleSubmit}>
           <SegmentedControl
             name="type"
             value={type}
             onValueChange={(e) => setType(e.value as 'income' | 'expense')}
             items={[
-              { label: 'Expense', value: 'expense' },
-              { label: 'Income', value: 'income' }
+              { label: t('common.expense'), value: 'expense' },
+              { label: t('common.income'), value: 'income' }
             ]}
             css={{
               "--segment-indicator-bg": "#6366f1",
@@ -204,6 +231,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             }}
           />
           <Input
+            ref={amountInputRef}
             value={amount}
             onChange={(e) => {
               const val = e.target.value.replace(',', '.');
@@ -212,7 +240,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
               }
             }}
             inputMode="decimal"
-            placeholder="Amount"
+            placeholder={t('transactions.amount')}
             required
             width="full"
             variant="subtle"
@@ -227,7 +255,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             width="full"
           >
             <SelectTrigger>
-              <SelectValueText placeholder="Select category" />
+              <SelectValueText placeholder={t('transactions.selectCategory')} />
             </SelectTrigger>
             <SelectContent>
               {currentCategories.map(cat => (
@@ -239,7 +267,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
           </SelectRoot>
           <Input
             variant="subtle"
-            placeholder="Description..."
+            placeholder={t('transactions.descriptionPlaceholder')}
             value={description}
             onChange={e => setDescription(e.target.value)}
           />
@@ -263,7 +291,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
               checked={isRecurring}
               onCheckedChange={(e) => setIsRecurring(e.checked)}
             >
-              Make this a recurring transaction
+              {t('transactions.makeRecurring')}
             </Switch>
           )}
 
@@ -276,7 +304,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
               width="full"
             >
               <SelectTrigger>
-                <SelectValueText placeholder="Select interval" />
+                <SelectValueText placeholder={t('transactions.selectInterval')} />
               </SelectTrigger>
               <SelectContent>
                 {recurrenceCollection.items.map((item) => (
@@ -295,11 +323,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
                 onDelete(transactionId);
                 onClose();
               }}>
-                Delete
+                {t('common.delete')}
               </DeleteButton>
             )}
-            <Button type="button" $variant="secondary" onClick={onClose}>Cancel</Button>
-            <Button type="submit" $variant="primary">Save</Button>
+            <Button type="button" $variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
+            <Button type="submit" $variant="primary">{t('common.save')}</Button>
           </Row>
         </Form>
       </ModalContent>

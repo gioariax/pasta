@@ -7,7 +7,6 @@ import { IconRenderer } from '../components/IconRenderer';
 import { DateSelector } from '../components/DateSelector';
 import { useDateStore } from '../store/dateStore';
 import { useTranslation } from 'react-i18next';
-import { formatDateAsDdSlashMMSlashYyyy } from '../lib/date';
 import {
   SwipeableList,
   SwipeableListItem,
@@ -72,25 +71,20 @@ const AddTransactionButton = styled(Button)`
 const TransactionList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
-
-  .swipeable-list-item {
-    margin-bottom: ${({ theme }) => theme.spacing.sm};
-  }
+  gap: ${({ theme }) => theme.spacing.xl};
 `;
 
-const TransactionItem = styled.div`
+const TransactionItem = styled.div<{ $isLast?: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${({ theme }) => theme.spacing.md};
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 12px;
+  padding: ${({ theme }) => theme.spacing.md} 0;
+  border-bottom: ${({ $isLast }) => ($isLast ? 'none' : '1px solid rgba(255, 255, 255, 0.05)')};
   transition: background 0.2s;
   cursor: pointer;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
   }
 `;
 
@@ -146,28 +140,34 @@ const TxIconContainer = styled.div<{ $type: 'income' | 'expense' }>`
 const DayGroupHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 16px 0 8px 0;
+  justify-content: space-between;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+  padding-bottom: ${({ theme }) => theme.spacing.sm};
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 `;
 
-const DayCircle = styled.div`
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  color: ${({ theme }) => theme.colors.textPrimary};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
+const DayDateLabel = styled.div`
   font-weight: 600;
-  flex-shrink: 0;
+  font-size: 16px;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  text-transform: capitalize;
 `;
 
-const DayDivider = styled.div`
-  height: 1px;
-  flex-grow: 1;
-  background: rgba(255, 255, 255, 0.05);
+const DayTotalLabel = styled.div`
+  font-weight: 600;
+  font-size: 16px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const DayCard = styled.div`
+  ${({ theme }) => theme.utils.glass}
+  background: rgba(255, 255, 255, 0.03);
+  padding: ${({ theme }) => theme.spacing.md};
+  border-radius: 16px;
+
+  @media (min-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.lg};
+  }
 `;
 
 const NoTransactionsMessage = styled.div`
@@ -182,7 +182,7 @@ const formatCurrency = (amount: number) => {
 
 
 const Transactions: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { categories } = useSettings();
   const { selectedMonth, selectedYear } = useDateStore();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -285,40 +285,67 @@ const Transactions: React.FC = () => {
         {sortedDays.length === 0 && (
           <NoTransactionsMessage>{t('transactions.noTransactions')}</NoTransactionsMessage>
         )}
-        {sortedDays.map(day => (
-          <div key={day}>
-            <DayGroupHeader>
-              <DayCircle>{day}</DayCircle>
-              <DayDivider />
-            </DayGroupHeader>
-            <SwipeableList type={ListType.IOS} fullSwipe={true}>
-              {groupedTransactions[day].map((tx, idx) => {
-                const catDef = categories.find(c => c.name === tx.category);
-                return (
-                  <SwipeableListItem
-                    key={tx.transactionId || idx}
-                    trailingActions={trailingActions(tx)}
-                  >
-                    <TransactionItem style={{ width: '100%' }} onClick={() => handleOpenModalForEdit(tx)}>
-                      <TxLeftContent>
-                        <TxIconContainer $type={tx.type}>
-                          <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
-                        </TxIconContainer>
-                        <TxLeft>
-                          <TxTitle>{tx.description || tx.category}</TxTitle>
-                          <TxSubtitle>{tx.description ? tx.category : formatDateAsDdSlashMMSlashYyyy(tx.date)}</TxSubtitle>
-                        </TxLeft>
-                      </TxLeftContent>
-                      <TxAmount $type={tx.type}>
-                        {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                      </TxAmount>
-                    </TransactionItem>
-                  </SwipeableListItem>
-                );
-              })}
-            </SwipeableList>
-          </div>
-        ))}
+        {sortedDays.map(day => {
+          const dayTransactions = groupedTransactions[day];
+          const firstTxDate = new Date(dayTransactions[0].date);
+
+          let formattedDate = new Intl.DateTimeFormat(i18n.language, {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'short'
+          }).format(firstTxDate);
+
+          // Capitalize first letter
+          formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+
+          const dayTotalExpenses = dayTransactions
+            .filter(tx => tx.type === 'expense')
+            .reduce((sum, tx) => sum + tx.amount, 0);
+
+          return (
+            <DayCard key={day}>
+              <DayGroupHeader>
+                <DayDateLabel>{formattedDate}</DayDateLabel>
+                {dayTotalExpenses > 0 && (
+                  <DayTotalLabel>
+                    -{formatCurrency(dayTotalExpenses)}
+                  </DayTotalLabel>
+                )}
+              </DayGroupHeader>
+              <SwipeableList type={ListType.IOS} fullSwipe={true}>
+                {dayTransactions.map((tx, idx) => {
+                  const catDef = categories.find(c => c.name === tx.category);
+                  const isLast = idx === dayTransactions.length - 1;
+                  return (
+                    <SwipeableListItem
+                      key={tx.transactionId || idx}
+                      trailingActions={trailingActions(tx)}
+                    >
+                      <TransactionItem
+                        style={{ width: '100%' }}
+                        $isLast={isLast}
+                        onClick={() => handleOpenModalForEdit(tx)}
+                      >
+                        <TxLeftContent>
+                          <TxIconContainer $type={tx.type}>
+                            <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
+                          </TxIconContainer>
+                          <TxLeft>
+                            <TxTitle>{tx.description || tx.category}</TxTitle>
+                            <TxSubtitle>{tx.description ? tx.category : ''}</TxSubtitle>
+                          </TxLeft>
+                        </TxLeftContent>
+                        <TxAmount $type={tx.type}>
+                          {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                        </TxAmount>
+                      </TransactionItem>
+                    </SwipeableListItem>
+                  );
+                })}
+              </SwipeableList>
+            </DayCard>
+          );
+        })}
       </TransactionList>
 
       <TransactionModal
