@@ -57,7 +57,19 @@
         "language": "Idioma",
         "specialTracking": "Seguimiento Especial",
         "monthlyBudget": "Presupuesto Mensual",
-        "budgetPlaceholder": "Ingresa el presupuesto..."
+        "budgetPlaceholder": "Ingresa el presupuesto...",
+        "dashboardWidgets": "Gráficos Analíticos del Dashboard",
+        "expenseDistribution": "Distribución de Gastos (Dona)",
+        "incomeVsExpense": "Tendencias de Ingresos vs Gastos",
+        "burnRate": "Ritmo de Gasto vs Presupuesto",
+        "cashFlow": "Flujo de Caja Proyectado",
+        "heatmap": "Mapa de Calor de Intensidad de Gasto",
+        "expenseDistributionDesc": "Visualiza cómo se distribuyen tus gastos entre las diferentes categorías.",
+        "incomeVsExpenseDesc": "Compara tus ingresos totales frente a los gastos de los últimos 6 meses.",
+        "burnRateDesc": "Rastrea tu gasto acumulado diario frente a los presupuestos definidos.",
+        "cashFlowDesc": "Proyecta tu balance a fin de mes basado en transacciones recurrentes planificadas.",
+        "heatmapDesc": "Resalta los días con mayor intensidad de gasto durante el mes.",
+        "chartsInfoTitle": "Información de Referencia de Gráficos"
     },
     "templates": {
         "manageTemplates": "Administrar Plantillas",

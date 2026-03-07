@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp, FiPieChart } from 'react-icons/fi';
+import { FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp, FiPieChart, FiInfo } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import Templates from './Templates';
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { createListCollection } from '@chakra-ui/react';
 import { Switch } from '../components/ui/switch';
 import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from '../components/ui/select';
+import { DialogBody, DialogCloseTrigger, DialogContent, DialogHeader, DialogRoot, DialogTitle } from '../components/ui/dialog';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -115,6 +116,7 @@ const Settings: React.FC = () => {
     const { logout } = useAuth();
     const { dashboardWidgets, saveWidgets } = useSettings();
     const [openSection, setOpenSection] = useState<'categories' | 'recurring' | 'widgets' | null>(null);
+    const [isInfoModalOpen, setInfoModalOpen] = useState(false);
 
     const toggleSection = (section: 'categories' | 'recurring' | 'widgets') => {
         setOpenSection(prev => prev === section ? null : section);
@@ -191,51 +193,97 @@ const Settings: React.FC = () => {
                     </CollapsibleInner>
                 </CollapsibleContent>
 
-                <SectionButton onClick={() => toggleSection('widgets')}>
+                <SectionButton onClick={() => toggleSection('widgets')} style={{ position: 'relative' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <FiPieChart /> {t('settings.dashboardWidgets', 'Dashboard Analytical Charts')}
                     </span>
-                    {openSection === 'widgets' ? <FiChevronUp /> : <FiChevronDown />}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setInfoModalOpen(true);
+                            }}
+                            style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}
+                            title={t('settings.infoButton', 'Information')}
+                        >
+                            <FiInfo size={20} />
+                        </button>
+                        {openSection === 'widgets' ? <FiChevronUp /> : <FiChevronDown />}
+                    </div>
                 </SectionButton>
                 <CollapsibleContent $isOpen={openSection === 'widgets'}>
-                    <CollapsibleInner style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '12px' }}>
-                        <Switch
-                            checked={dashboardWidgets.expenseDistribution}
-                            onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, expenseDistribution: e.checked })}
-                        >
-                            {t('settings.expenseDistribution', 'Expense Distribution (Donut Chart)')}
-                        </Switch>
+                    <CollapsibleInner>
+                        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '12px' }}>
+                            <Switch
+                                checked={dashboardWidgets.expenseDistribution}
+                                onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, expenseDistribution: e.checked })}
+                            >
+                                {t('settings.expenseDistribution', 'Expense Distribution (Donut Chart)')}
+                            </Switch>
 
-                        <Switch
-                            checked={dashboardWidgets.incomeVsExpense}
-                            onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, incomeVsExpense: e.checked })}
-                        >
-                            {t('settings.incomeVsExpense', 'Income vs Expense Trends')}
-                        </Switch>
+                            <Switch
+                                checked={dashboardWidgets.incomeVsExpense}
+                                onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, incomeVsExpense: e.checked })}
+                            >
+                                {t('settings.incomeVsExpense', 'Income vs Expense Trends')}
+                            </Switch>
 
-                        <Switch
-                            checked={dashboardWidgets.burnRate}
-                            onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, burnRate: e.checked })}
-                        >
-                            {t('settings.burnRate', 'Burn Rate vs Budget Constraints')}
-                        </Switch>
+                            <Switch
+                                checked={dashboardWidgets.burnRate}
+                                onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, burnRate: e.checked })}
+                            >
+                                {t('settings.burnRate', 'Burn Rate vs Budget Constraints')}
+                            </Switch>
 
-                        <Switch
-                            checked={dashboardWidgets.cashFlow}
-                            onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, cashFlow: e.checked })}
-                        >
-                            {t('settings.cashFlow', 'Projected Cash Flow')}
-                        </Switch>
+                            <Switch
+                                checked={dashboardWidgets.cashFlow}
+                                onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, cashFlow: e.checked })}
+                            >
+                                {t('settings.cashFlow', 'Projected Cash Flow')}
+                            </Switch>
 
-                        <Switch
-                            checked={dashboardWidgets.heatmap}
-                            onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, heatmap: e.checked })}
-                        >
-                            {t('settings.heatmap', 'Expenditure Intensity Heatmap')}
-                        </Switch>
+                            <Switch
+                                checked={dashboardWidgets.heatmap}
+                                onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, heatmap: e.checked })}
+                            >
+                                {t('settings.heatmap', 'Expenditure Intensity Heatmap')}
+                            </Switch>
+                        </div>
                     </CollapsibleInner>
                 </CollapsibleContent>
             </div>
+
+            <DialogRoot open={isInfoModalOpen} onOpenChange={(e: { open: boolean }) => setInfoModalOpen(e.open)} placement="center" motionPreset="slide-in-bottom">
+                <DialogContent style={{ background: 'rgba(17, 24, 39, 0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'white', borderRadius: '16px' }}>
+                    <DialogHeader>
+                        <DialogTitle>{t('settings.chartsInfoTitle', 'Charts Information')}</DialogTitle>
+                    </DialogHeader>
+                    <DialogBody style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '24px' }}>
+                        <div>
+                            <strong style={{ display: 'block', marginBottom: '4px', color: '#60a5fa' }}>{t('settings.expenseDistribution', 'Expense Distribution')}</strong>
+                            <p style={{ margin: 0, fontSize: '14px', color: '#d1d5db' }}>{t('settings.expenseDistributionDesc', 'Visualizes how your expenses are distributed across categories.')}</p>
+                        </div>
+                        <div>
+                            <strong style={{ display: 'block', marginBottom: '4px', color: '#60a5fa' }}>{t('settings.incomeVsExpense', 'Income vs Expense Trends')}</strong>
+                            <p style={{ margin: 0, fontSize: '14px', color: '#d1d5db' }}>{t('settings.incomeVsExpenseDesc', 'Compares your total income against expenses over the last 6 months.')}</p>
+                        </div>
+                        <div>
+                            <strong style={{ display: 'block', marginBottom: '4px', color: '#60a5fa' }}>{t('settings.burnRate', 'Burn Rate vs Budget')}</strong>
+                            <p style={{ margin: 0, fontSize: '14px', color: '#d1d5db' }}>{t('settings.burnRateDesc', 'Tracks your daily cumulative spending against your defined budgets.')}</p>
+                        </div>
+                        <div>
+                            <strong style={{ display: 'block', marginBottom: '4px', color: '#60a5fa' }}>{t('settings.cashFlow', 'Projected Cash Flow')}</strong>
+                            <p style={{ margin: 0, fontSize: '14px', color: '#d1d5db' }}>{t('settings.cashFlowDesc', 'Projects your end-of-month balance based on planned recurring transactions.')}</p>
+                        </div>
+                        <div>
+                            <strong style={{ display: 'block', marginBottom: '4px', color: '#60a5fa' }}>{t('settings.heatmap', 'Expenditure Heatmap')}</strong>
+                            <p style={{ margin: 0, fontSize: '14px', color: '#d1d5db' }}>{t('settings.heatmapDesc', 'Highlights the days with the highest spending intensity during the month.')}</p>
+                        </div>
+                    </DialogBody>
+                    <DialogCloseTrigger style={{ color: '#9ca3af' }} />
+                </DialogContent>
+            </DialogRoot>
+
         </Container>
     );
 };

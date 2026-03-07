@@ -57,7 +57,19 @@
         "language": "Language",
         "specialTracking": "Special Tracking",
         "monthlyBudget": "Monthly Budget",
-        "budgetPlaceholder": "Enter budget..."
+        "budgetPlaceholder": "Enter budget...",
+        "dashboardWidgets": "Dashboard Analytical Charts",
+        "expenseDistribution": "Expense Distribution (Donut Chart)",
+        "incomeVsExpense": "Income vs Expense Trends",
+        "burnRate": "Burn Rate vs Budget Constraints",
+        "cashFlow": "Projected Cash Flow",
+        "heatmap": "Expenditure Intensity Heatmap",
+        "expenseDistributionDesc": "Visualizes how your expenses are distributed across categories.",
+        "incomeVsExpenseDesc": "Compares your total income against expenses over the last 6 months.",
+        "burnRateDesc": "Tracks your daily cumulative spending against your defined budgets.",
+        "cashFlowDesc": "Projects your end-of-month balance based on planned recurring transactions.",
+        "heatmapDesc": "Highlights the days with the highest spending intensity during the month.",
+        "chartsInfoTitle": "Charts Information"
     },
     "templates": {
         "manageTemplates": "Manage Templates",

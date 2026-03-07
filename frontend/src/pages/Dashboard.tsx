@@ -261,9 +261,9 @@ const SuggestedItem = styled(TransactionItem)`
   gap: ${({ theme }) => theme.spacing.md};
 
   @media (max-width: 767px) {
-    flex-direction: column;
-    align-items: stretch;
-    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+    flex-direction: row;
+    align-items: center;
+    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
     gap: ${({ theme }) => theme.spacing.xs};
   }
 `;
@@ -273,6 +273,7 @@ const SuggestedItemLeft = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
   min-width: 0;
+  flex: 1;
 
   @media (max-width: 767px) {
     gap: ${({ theme }) => theme.spacing.sm};
@@ -297,18 +298,17 @@ const SuggestedItemRight = styled.div`
   gap: ${({ theme }) => theme.spacing.md};
 
   @media (max-width: 767px) {
-    justify-content: space-between;
-    width: 100%;
+    justify-content: flex-end;
     gap: ${({ theme }) => theme.spacing.sm};
   }
 `;
 
 const SuggestedAcceptButton = styled(Button)`
   @media (max-width: 767px) {
-    padding: 6px 12px;
+    padding: 6px 10px;
     font-size: 13px;
-    min-height: 34px;
-    min-width: 116px;
+    min-height: 32px;
+    min-width: auto;
     text-align: center;
   }
 `;
@@ -316,6 +316,7 @@ const SuggestedAcceptButton = styled(Button)`
 const SuggestedAmount = styled(TxAmount)`
   @media (max-width: 767px) {
     font-size: 14px;
+    white-space: nowrap;
   }
 `;
 
@@ -545,11 +546,11 @@ const Dashboard: React.FC = () => {
                         {template.recurrenceInterval === 1 ? t('templates.intervalMonthly') : t('templates.intervalMonths', { count: template.recurrenceInterval })}
                       </SuggestedSubtitle>
                     </TxLeft>
-                  </SuggestedItemLeft>
-                  <SuggestedItemRight>
                     <SuggestedAmount $type={template.type}>
                       {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
                     </SuggestedAmount>
+                  </SuggestedItemLeft>
+                  <SuggestedItemRight>
                     <SuggestedAcceptButton
                       $primary
                       disabled={acceptingTemplates.has(template.transactionId!)}
