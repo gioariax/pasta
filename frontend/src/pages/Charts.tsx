@@ -18,13 +18,6 @@ const Header = styled.header`
   margin-bottom: ${({ theme }) => theme.spacing.md};
 `;
 
-const Title = styled.h1`
-  font-size: 32px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-`;
 
 const Charts: React.FC = () => {
   const { t } = useTranslation();

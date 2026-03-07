@@ -23,10 +23,6 @@ const Header = styled.header`
   margin-bottom: ${({ theme }) => theme.spacing.xl};
 `;
 
-const Title = styled.h1`
-  font-size: 32px;
-  font-weight: 700;
-`;
 
 const HeaderActions = styled.div`
   display: flex;

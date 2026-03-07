@@ -8,11 +8,11 @@ import { DateSelector } from '../components/DateSelector';
 import { useDateStore } from '../store/dateStore';
 import { useTranslation } from 'react-i18next';
 import {
-    SwipeableList,
-    SwipeableListItem,
-    SwipeAction,
-    TrailingActions,
-    Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+  Type as ListType,
 } from 'react-swipeable-list';
 import 'react-swipeable-list/dist/styles.css';
 import { FiTrash2 } from 'react-icons/fi';
@@ -35,13 +35,6 @@ const Header = styled.header`
   margin-bottom: ${({ theme }) => theme.spacing.xl};
 `;
 
-const Title = styled.h1`
-  font-size: 32px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-`;
 
 const Button = styled.button<{ $primary?: boolean }>`
   padding: 8px 16px;
@@ -165,155 +158,155 @@ const NoTransactionsMessage = styled.div`
 `;
 
 const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
 };
 
 
 const Transactions: React.FC = () => {
-    const { t } = useTranslation();
-    const { categories } = useSettings();
-    const { selectedMonth, selectedYear } = useDateStore();
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [isModalOpen, setModalOpen] = useState(false);
+  const { t } = useTranslation();
+  const { categories } = useSettings();
+  const { selectedMonth, selectedYear } = useDateStore();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isModalOpen, setModalOpen] = useState(false);
 
-    useEffect(() => {
-        // eslint-disable-next-line
-        loadTransactions();
-    }, []);
+  useEffect(() => {
+    // eslint-disable-next-line
+    loadTransactions();
+  }, []);
 
-    const loadTransactions = async () => {
-        try {
-            const data = await fetchTransactions();
-            setTransactions(data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  const loadTransactions = async () => {
+    try {
+      const data = await fetchTransactions();
+      setTransactions(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
-    const handleOpenModalForCreate = () => {
-        setEditingTransaction(null);
-        setModalOpen(true);
-    };
+  const handleOpenModalForCreate = () => {
+    setEditingTransaction(null);
+    setModalOpen(true);
+  };
 
-    const handleOpenModalForEdit = (tx: Transaction) => {
-        setEditingTransaction(tx);
-        setModalOpen(true);
-    };
+  const handleOpenModalForEdit = (tx: Transaction) => {
+    setEditingTransaction(tx);
+    setModalOpen(true);
+  };
 
-    const handleSaveTransaction = async (data: any) => {
-        try {
-            if (editingTransaction && editingTransaction.transactionId) {
-                await updateTransaction(editingTransaction.transactionId, data);
-            } else {
-                await createTransaction(data);
-            }
-            await loadTransactions();
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  const handleSaveTransaction = async (data: any) => {
+    try {
+      if (editingTransaction && editingTransaction.transactionId) {
+        await updateTransaction(editingTransaction.transactionId, data);
+      } else {
+        await createTransaction(data);
+      }
+      await loadTransactions();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const handleDeleteTransaction = async (id: string) => {
-        try {
-            await deleteTransaction(id);
-            await loadTransactions();
-            setModalOpen(false);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  const handleDeleteTransaction = async (id: string) => {
+    try {
+      await deleteTransaction(id);
+      await loadTransactions();
+      setModalOpen(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const normalTransactions = transactions.filter(t => !t.isTemplate && !t.transactionId?.startsWith('TEMPLATE_'));
+  const normalTransactions = transactions.filter(t => !t.isTemplate && !t.transactionId?.startsWith('TEMPLATE_'));
 
-    const filteredTransactions = normalTransactions.filter(tx => {
-        const txDate = new Date(tx.date);
-        return txDate.getMonth() === selectedMonth && txDate.getFullYear() === selectedYear;
-    });
+  const filteredTransactions = normalTransactions.filter(tx => {
+    const txDate = new Date(tx.date);
+    return txDate.getMonth() === selectedMonth && txDate.getFullYear() === selectedYear;
+  });
 
-    const sortedTransactions = [...filteredTransactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedTransactions = [...filteredTransactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    const groupedTransactions = sortedTransactions.reduce((acc, tx) => {
-        const day = new Date(tx.date).getDate().toString().padStart(2, '0');
-        if (!acc[day]) acc[day] = [];
-        acc[day].push(tx);
-        return acc;
-    }, {} as Record<string, Transaction[]>);
+  const groupedTransactions = sortedTransactions.reduce((acc, tx) => {
+    const day = new Date(tx.date).getDate().toString().padStart(2, '0');
+    if (!acc[day]) acc[day] = [];
+    acc[day].push(tx);
+    return acc;
+  }, {} as Record<string, Transaction[]>);
 
-    const sortedDays = Object.keys(groupedTransactions).sort((a, b) => parseInt(b) - parseInt(a));
+  const sortedDays = Object.keys(groupedTransactions).sort((a, b) => parseInt(b) - parseInt(a));
 
-    const trailingActions = (tx: Transaction) => (
-        <TrailingActions>
-            <SwipeAction
-                destructive={true}
-                onClick={() => handleDeleteTransaction(tx.transactionId!)}
-            >
-                <SwipeActionContent>
-                    <FiTrash2 size={20} />
-                    {t('common.delete')}
-                </SwipeActionContent>
-            </SwipeAction>
-        </TrailingActions>
-    );
+  const trailingActions = (tx: Transaction) => (
+    <TrailingActions>
+      <SwipeAction
+        destructive={true}
+        onClick={() => handleDeleteTransaction(tx.transactionId!)}
+      >
+        <SwipeActionContent>
+          <FiTrash2 size={20} />
+          {t('common.delete')}
+        </SwipeActionContent>
+      </SwipeAction>
+    </TrailingActions>
+  );
 
-    return (
-        <Container>
-            <Header />
+  return (
+    <Container>
+      <Header />
 
-            <DateSelector />
+      <DateSelector />
 
-            <Button $primary onClick={handleOpenModalForCreate}>{t('transactions.addTransaction')}</Button>
+      <Button $primary onClick={handleOpenModalForCreate}>{t('transactions.addTransaction')}</Button>
 
-            <TransactionList>
-                {sortedDays.length === 0 && (
-                    <NoTransactionsMessage>{t('transactions.noTransactions')}</NoTransactionsMessage>
-                )}
-                {sortedDays.map(day => (
-                    <div key={day}>
-                        <DayGroupHeader>
-                            <DayCircle>{day}</DayCircle>
-                            <DayDivider />
-                        </DayGroupHeader>
-                        <SwipeableList type={ListType.IOS} fullSwipe={true}>
-                            {groupedTransactions[day].map((tx, idx) => {
-                                const catDef = categories.find(c => c.name === tx.category);
-                                return (
-                                    <SwipeableListItem
-                                        key={tx.transactionId || idx}
-                                        trailingActions={trailingActions(tx)}
-                                    >
-                                        <TransactionItem style={{ width: '100%' }} onClick={() => handleOpenModalForEdit(tx)}>
-                                            <TxLeftContent>
-                                                <TxIconContainer $type={tx.type}>
-                                                    <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
-                                                </TxIconContainer>
-                                                <TxLeft>
-                                                    <TxTitle>{tx.description || tx.category}</TxTitle>
-                                                    <TxSubtitle>{tx.description ? tx.category : new Date(tx.date).toLocaleDateString()}</TxSubtitle>
-                                                </TxLeft>
-                                            </TxLeftContent>
-                                            <TxAmount $type={tx.type}>
-                                                {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                                            </TxAmount>
-                                        </TransactionItem>
-                                    </SwipeableListItem>
-                                );
-                            })}
-                        </SwipeableList>
-                    </div>
-                ))}
-            </TransactionList>
+      <TransactionList>
+        {sortedDays.length === 0 && (
+          <NoTransactionsMessage>{t('transactions.noTransactions')}</NoTransactionsMessage>
+        )}
+        {sortedDays.map(day => (
+          <div key={day}>
+            <DayGroupHeader>
+              <DayCircle>{day}</DayCircle>
+              <DayDivider />
+            </DayGroupHeader>
+            <SwipeableList type={ListType.IOS} fullSwipe={true}>
+              {groupedTransactions[day].map((tx, idx) => {
+                const catDef = categories.find(c => c.name === tx.category);
+                return (
+                  <SwipeableListItem
+                    key={tx.transactionId || idx}
+                    trailingActions={trailingActions(tx)}
+                  >
+                    <TransactionItem style={{ width: '100%' }} onClick={() => handleOpenModalForEdit(tx)}>
+                      <TxLeftContent>
+                        <TxIconContainer $type={tx.type}>
+                          <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color={tx.type === 'income' ? '#10b981' : '#f43f5e'} />
+                        </TxIconContainer>
+                        <TxLeft>
+                          <TxTitle>{tx.description || tx.category}</TxTitle>
+                          <TxSubtitle>{tx.description ? tx.category : new Date(tx.date).toLocaleDateString()}</TxSubtitle>
+                        </TxLeft>
+                      </TxLeftContent>
+                      <TxAmount $type={tx.type}>
+                        {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                      </TxAmount>
+                    </TransactionItem>
+                  </SwipeableListItem>
+                );
+              })}
+            </SwipeableList>
+          </div>
+        ))}
+      </TransactionList>
 
-            <TransactionModal
-                isOpen={isModalOpen}
-                initialData={editingTransaction}
-                onClose={() => setModalOpen(false)}
-                onSubmit={handleSaveTransaction}
-                onDelete={handleDeleteTransaction}
-            />
-        </Container>
-    );
+      <TransactionModal
+        isOpen={isModalOpen}
+        initialData={editingTransaction}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleSaveTransaction}
+        onDelete={handleDeleteTransaction}
+      />
+    </Container>
+  );
 };
 
 export default Transactions;
