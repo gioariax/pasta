@@ -69,7 +69,14 @@
         "burnRateDesc": "Tracks your daily cumulative spending against your defined budgets.",
         "cashFlowDesc": "Projects your end-of-month balance based on planned recurring transactions.",
         "heatmapDesc": "Highlights the days with the highest spending intensity during the month.",
-        "chartsInfoTitle": "Charts Information"
+        "chartsInfoTitle": "Charts Information",
+        "dashboardLayout": "Dashboard Layout",
+        "layoutBalance": "Current Balance",
+        "layoutIncomeExpense": "Total Income & Expenses",
+        "layoutProjected": "Projected Expenses",
+        "layoutCharts": "Analytical Charts",
+        "layoutSuggested": "Suggested Actions",
+        "layoutBudgets": "Tracked Budgets"
     },
     "templates": {
         "manageTemplates": "Manage Templates",

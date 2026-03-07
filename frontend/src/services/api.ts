@@ -28,6 +28,7 @@ export interface Category {
 export interface UserSettings {
     categories: Category[];
     dashboardWidgets?: Record<string, boolean>;
+    dashboardLayout?: string[];
 }
 
 

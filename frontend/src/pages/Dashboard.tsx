@@ -335,7 +335,7 @@ const formatCurrency = (amount: number) => {
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
-  const { categories, dashboardWidgets } = useSettings();
+  const { categories, dashboardWidgets, dashboardLayout } = useSettings();
   const { selectedMonth, selectedYear } = useDateStore();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -453,119 +453,139 @@ const Dashboard: React.FC = () => {
         </AddTransactionButton>
       </AddButtonContainer>
 
-      <CardsGrid>
-        <SummaryCard $featured>
-          <CardLabel $featured>{t('dashboard.currentBalance')}</CardLabel>
-          <CardValue $featured>{formatCurrency(balance)}</CardValue>
-        </SummaryCard>
-        <SummaryCard>
-          <CardLabel>{t('dashboard.totalIncome')}</CardLabel>
-          <CardValue $type="income">+{formatCurrency(income)}</CardValue>
-        </SummaryCard>
-        <SummaryCard>
-          <CardLabel>{t('dashboard.totalExpenses')}</CardLabel>
-          <CardValue $type="expense">-{formatCurrency(expense)}</CardValue>
-        </SummaryCard>
-        {suggestedTemplates.filter(t => t.type === 'expense').length > 0 && (
-          <SummaryCard $featured>
-            <CardLabel $featured>{t('dashboard.projectedExpenses')}</CardLabel>
-            <CardValue $type="projected" $featured>-{formatCurrency(projectedExpenses)}</CardValue>
-          </SummaryCard>
-        )}
-      </CardsGrid>
-
-      {/* Render Activated Widgets */}
-      {dashboardWidgets && (
-        <ChartsGrid>
-          {dashboardWidgets.expenseDistribution && (
-            <ExpenseDistributionChart transactions={currentMonthTransactions} />
-          )}
-          {dashboardWidgets.incomeVsExpense && (
-            <IncomeVsExpenseTrend transactions={transactions} />
-          )}
-          {dashboardWidgets.burnRate && (
-            <BurnRateChart transactions={currentMonthTransactions} categories={categories} />
-          )}
-          {dashboardWidgets.cashFlow && (
-            <ProjectedCashflowChart transactions={currentMonthTransactions} suggestedTemplates={suggestedTemplates} />
-          )}
-          {dashboardWidgets.heatmap && (
-            <ExpenseHeatmapChart transactions={currentMonthTransactions} />
-          )}
-        </ChartsGrid>
-      )}
-
-      {budgetsData.length > 0 && (
-        <>
-          <SectionTitle>{t('dashboard.trackedBudgets', 'Presupuestos Seguimiento')}</SectionTitle>
-          <BudgetGrid>
-            {budgetsData.map(data => (
-              <BudgetCard key={data.id}>
-                <BudgetHeader>
-                  <BudgetCategory>
-                    <IconRenderer name={data.icon} size={18} color="#f43f5e" />
-                    {data.name}
-                  </BudgetCategory>
-                  <span style={{ fontWeight: 600, color: data.isOverBudget ? '#ef4444' : undefined }}>
-                    {formatCurrency(data.spent)}
-                  </span>
-                </BudgetHeader>
-                {data.budget !== undefined && data.budget > 0 && (
-                  <>
-                    <ProgressBarBackground>
-                      <ProgressBarFill $percent={data.percent} />
-                    </ProgressBarBackground>
-                    <BudgetAmounts>
-                      <span>{data.percent.toFixed(0)}%</span>
-                      <span>{t('dashboard.ofBudget', 'de')} {formatCurrency(data.budget)}</span>
-                    </BudgetAmounts>
-                  </>
+      {dashboardLayout && dashboardLayout.map((blockKey) => {
+        switch (blockKey) {
+          case 'balance':
+            return (
+              <CardsGrid key={blockKey}>
+                <SummaryCard $featured>
+                  <CardLabel $featured>{t('dashboard.currentBalance')}</CardLabel>
+                  <CardValue $featured>{formatCurrency(balance)}</CardValue>
+                </SummaryCard>
+              </CardsGrid>
+            );
+          case 'incomeExpense':
+            return (
+              <CardsGrid key={blockKey}>
+                <SummaryCard>
+                  <CardLabel>{t('dashboard.totalIncome')}</CardLabel>
+                  <CardValue $type="income">+{formatCurrency(income)}</CardValue>
+                </SummaryCard>
+                <SummaryCard>
+                  <CardLabel>{t('dashboard.totalExpenses')}</CardLabel>
+                  <CardValue $type="expense">-{formatCurrency(expense)}</CardValue>
+                </SummaryCard>
+              </CardsGrid>
+            );
+          case 'projected':
+            if (suggestedTemplates.filter(t => t.type === 'expense').length === 0) return null;
+            return (
+              <CardsGrid key={blockKey}>
+                <SummaryCard $featured>
+                  <CardLabel $featured>{t('dashboard.projectedExpenses')}</CardLabel>
+                  <CardValue $type="projected" $featured>-{formatCurrency(projectedExpenses)}</CardValue>
+                </SummaryCard>
+              </CardsGrid>
+            );
+          case 'charts':
+            if (!dashboardWidgets) return null;
+            return (
+              <ChartsGrid key={blockKey}>
+                {dashboardWidgets.expenseDistribution && (
+                  <ExpenseDistributionChart transactions={currentMonthTransactions} />
                 )}
-              </BudgetCard>
-            ))}
-          </BudgetGrid>
-        </>
-      )}
-
-      {suggestedTemplates.length > 0 && (
-        <>
-          <SuggestedTitle>{t('dashboard.suggestedActions')}</SuggestedTitle>
-          <TransactionList>
-            {suggestedTemplates.map((template, idx) => {
-              const catDef = categories.find(c => c.name === template.category);
-              return (
-                <SuggestedItem key={template.transactionId || idx}>
-                  <SuggestedItemLeft>
-                    <SuggestedIconWrap>
-                      <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color="#3b82f6" />
-                    </SuggestedIconWrap>
-                    <TxLeft>
-                      <TxTitle>{template.description || template.category}</TxTitle>
-                      <SuggestedSubtitle>
-                        {template.description ? template.category : ''} {template.description ? '• ' : ''}
-                        {template.recurrenceInterval === 1 ? t('templates.intervalMonthly') : t('templates.intervalMonths', { count: template.recurrenceInterval })}
-                      </SuggestedSubtitle>
-                    </TxLeft>
-                  </SuggestedItemLeft>
-                  <SuggestedItemRight>
-                    <SuggestedAmount $type={template.type}>
-                      {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
-                    </SuggestedAmount>
-                    <SuggestedAcceptButton
-                      $primary
-                      disabled={acceptingTemplates.has(template.transactionId!)}
-                      style={{ opacity: acceptingTemplates.has(template.transactionId!) ? 0.5 : 1, cursor: acceptingTemplates.has(template.transactionId!) ? 'not-allowed' : 'pointer' }}
-                      onClick={(e) => { e.stopPropagation(); handleAcceptSuggestion(template); }}
-                    >
-                      {acceptingTemplates.has(template.transactionId!) ? t('common.accepting') : t('common.accept')}
-                    </SuggestedAcceptButton>
-                  </SuggestedItemRight>
-                </SuggestedItem>
-              );
-            })}
-          </TransactionList>
-        </>
-      )}
+                {dashboardWidgets.incomeVsExpense && (
+                  <IncomeVsExpenseTrend transactions={transactions} />
+                )}
+                {dashboardWidgets.burnRate && (
+                  <BurnRateChart transactions={currentMonthTransactions} categories={categories} />
+                )}
+                {dashboardWidgets.cashFlow && (
+                  <ProjectedCashflowChart transactions={currentMonthTransactions} suggestedTemplates={suggestedTemplates} />
+                )}
+                {dashboardWidgets.heatmap && (
+                  <ExpenseHeatmapChart transactions={currentMonthTransactions} />
+                )}
+              </ChartsGrid>
+            );
+          case 'budgets':
+            if (budgetsData.length === 0) return null;
+            return (
+              <React.Fragment key={blockKey}>
+                <SectionTitle>{t('dashboard.trackedBudgets', 'Presupuestos Seguimiento')}</SectionTitle>
+                <BudgetGrid>
+                  {budgetsData.map(data => (
+                    <BudgetCard key={data.id}>
+                      <BudgetHeader>
+                        <BudgetCategory>
+                          <IconRenderer name={data.icon} size={18} color="#f43f5e" />
+                          {data.name}
+                        </BudgetCategory>
+                        <span style={{ fontWeight: 600, color: data.isOverBudget ? '#ef4444' : undefined }}>
+                          {formatCurrency(data.spent)}
+                        </span>
+                      </BudgetHeader>
+                      {data.budget !== undefined && data.budget > 0 && (
+                        <>
+                          <ProgressBarBackground>
+                            <ProgressBarFill $percent={data.percent} />
+                          </ProgressBarBackground>
+                          <BudgetAmounts>
+                            <span>{data.percent.toFixed(0)}%</span>
+                            <span>{t('dashboard.ofBudget', 'de')} {formatCurrency(data.budget)}</span>
+                          </BudgetAmounts>
+                        </>
+                      )}
+                    </BudgetCard>
+                  ))}
+                </BudgetGrid>
+              </React.Fragment>
+            );
+          case 'suggested':
+            if (suggestedTemplates.length === 0) return null;
+            return (
+              <React.Fragment key={blockKey}>
+                <SuggestedTitle>{t('dashboard.suggestedActions')}</SuggestedTitle>
+                <TransactionList style={{ marginBottom: '24px' }}>
+                  {suggestedTemplates.map((template, idx) => {
+                    const catDef = categories.find(c => c.name === template.category);
+                    return (
+                      <SuggestedItem key={template.transactionId || idx}>
+                        <SuggestedItemLeft>
+                          <SuggestedIconWrap>
+                            <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color="#3b82f6" />
+                          </SuggestedIconWrap>
+                          <TxLeft>
+                            <TxTitle>{template.description || template.category}</TxTitle>
+                            <SuggestedSubtitle>
+                              {template.description ? template.category : ''} {template.description ? '• ' : ''}
+                              {template.recurrenceInterval === 1 ? t('templates.intervalMonthly') : t('templates.intervalMonths', { count: template.recurrenceInterval })}
+                            </SuggestedSubtitle>
+                          </TxLeft>
+                        </SuggestedItemLeft>
+                        <SuggestedItemRight>
+                          <SuggestedAmount $type={template.type}>
+                            {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
+                          </SuggestedAmount>
+                          <SuggestedAcceptButton
+                            $primary
+                            disabled={acceptingTemplates.has(template.transactionId!)}
+                            style={{ opacity: acceptingTemplates.has(template.transactionId!) ? 0.5 : 1, cursor: acceptingTemplates.has(template.transactionId!) ? 'not-allowed' : 'pointer' }}
+                            onClick={(e) => { e.stopPropagation(); handleAcceptSuggestion(template); }}
+                          >
+                            {acceptingTemplates.has(template.transactionId!) ? t('common.accepting') : t('common.accept')}
+                          </SuggestedAcceptButton>
+                        </SuggestedItemRight>
+                      </SuggestedItem>
+                    );
+                  })}
+                </TransactionList>
+              </React.Fragment>
+            );
+          default:
+            return null;
+        }
+      })}
 
       <FooterActions>
         <Button $primary onClick={() => navigate('/transactions')}>{t('dashboard.viewAllTransactions')}</Button>

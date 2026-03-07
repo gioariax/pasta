@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp, FiPieChart, FiInfo } from 'react-icons/fi';
+import { FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp, FiPieChart, FiInfo, FiMenu } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import Templates from './Templates';
@@ -10,6 +10,23 @@ import { createListCollection } from '@chakra-ui/react';
 import { Switch } from '../components/ui/switch';
 import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem } from '../components/ui/select';
 import { DialogBody, DialogCloseTrigger, DialogContent, DialogHeader, DialogRoot, DialogTitle } from '../components/ui/dialog';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -111,19 +128,92 @@ const langCollection = createListCollection({
     ]
 });
 
+interface SortableItemProps {
+    id: string;
+    label: string;
+}
+
+const SortableItemContainer = styled.div`
+    display: flex;
+    align-items: center;
+    gap: ${({ theme }) => theme.spacing.md};
+    padding: ${({ theme }) => theme.spacing.md};
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: ${({ theme }) => theme.spacing.xs};
+    cursor: grab;
+    touch-action: none;
+    
+    &:active {
+        cursor: grabbing;
+    }
+`;
+
+const SortableItem: React.FC<SortableItemProps> = (props) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+    } = useSortable({ id: props.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <SortableItemContainer ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            <FiMenu color="#9ca3af" />
+            <span style={{ color: 'white', fontWeight: 500 }}>{props.label}</span>
+        </SortableItemContainer>
+    );
+};
+
 const Settings: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { logout } = useAuth();
-    const { dashboardWidgets, saveWidgets } = useSettings();
-    const [openSection, setOpenSection] = useState<'categories' | 'recurring' | 'widgets' | null>(null);
+    const { dashboardWidgets, saveWidgets, dashboardLayout, saveLayout } = useSettings();
+    const [openSection, setOpenSection] = useState<'categories' | 'recurring' | 'widgets' | 'layout' | null>(null);
     const [isInfoModalOpen, setInfoModalOpen] = useState(false);
 
-    const toggleSection = (section: 'categories' | 'recurring' | 'widgets') => {
+    const toggleSection = (section: 'categories' | 'recurring' | 'widgets' | 'layout') => {
         setOpenSection(prev => prev === section ? null : section);
     };
 
     const changeLanguage = (lng: string) => {
         i18n.changeLanguage(lng);
+    };
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (active.id !== over?.id) {
+            const oldIndex = dashboardLayout.indexOf(active.id as string);
+            const newIndex = dashboardLayout.indexOf(over?.id as string);
+            const newLayout = arrayMove(dashboardLayout, oldIndex, newIndex);
+            saveLayout(newLayout);
+        }
+    };
+
+    const getLayoutLabel = (key: string) => {
+        switch (key) {
+            case 'balance': return t('settings.layoutBalance');
+            case 'incomeExpense': return t('settings.layoutIncomeExpense');
+            case 'projected': return t('settings.layoutProjected');
+            case 'charts': return t('settings.layoutCharts');
+            case 'suggested': return t('settings.layoutSuggested');
+            case 'budgets': return t('settings.layoutBudgets');
+            default: return key;
+        }
     };
 
     return (
@@ -248,6 +338,33 @@ const Settings: React.FC = () => {
                             >
                                 {t('settings.heatmap', 'Expenditure Intensity Heatmap')}
                             </Switch>
+                        </div>
+                    </CollapsibleInner>
+                </CollapsibleContent>
+
+                <SectionButton onClick={() => toggleSection('layout')}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FiGrid /> {t('settings.dashboardLayout', 'Dashboard Layout')}
+                    </span>
+                    {openSection === 'layout' ? <FiChevronUp /> : <FiChevronDown />}
+                </SectionButton>
+                <CollapsibleContent $isOpen={openSection === 'layout'}>
+                    <CollapsibleInner>
+                        <div style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '12px' }}>
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >
+                                <SortableContext
+                                    items={dashboardLayout}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    {dashboardLayout.map((id) => (
+                                        <SortableItem key={id} id={id} label={getLayoutLabel(id)} />
+                                    ))}
+                                </SortableContext>
+                            </DndContext>
                         </div>
                     </CollapsibleInner>
                 </CollapsibleContent>

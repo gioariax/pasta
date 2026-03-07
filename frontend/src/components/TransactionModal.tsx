@@ -145,6 +145,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
   const [recurrenceInterval, setRecurrenceInterval] = useState(1);
 
   const amountInputRef = useRef<HTMLInputElement>(null);
+  const modalContentRef = useRef<HTMLDivElement>(null);
 
   // Pre-populate fields on open
   React.useEffect(() => {
@@ -181,11 +182,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
   // Handle auto-focus when modal opens
   useEffect(() => {
     if (isOpen) {
-      // AutoFocus triggers viewport scroll anomalies on iOS because the modal is sliding up.
-      // This timeout forces the view to scroll back to the focused element after animation.
+      // AutoFocus naturally brings up the keyboard, but browsers may over-scroll the view inside the modal.
+      // We reset the scroll to the top of the modal content after the animation to ensure the Value/Category fields are visible.
       const timer = setTimeout(() => {
-        if (amountInputRef.current) {
-          amountInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (modalContentRef.current) {
+          modalContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }, 350);
       return () => clearTimeout(timer);
@@ -217,7 +218,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
 
   return (
     <Overlay $presentation={presentation}>
-      <ModalContent $presentation={presentation}>
+      <ModalContent ref={modalContentRef} $presentation={presentation}>
         <Title>{initialData ? t('transactions.editTransaction') : t('transactions.newTransaction')}</Title>
         <Form onSubmit={handleSubmit}>
           <SegmentedControl

@@ -69,7 +69,14 @@
         "burnRateDesc": "Rastrea tu gasto acumulado diario frente a los presupuestos definidos.",
         "cashFlowDesc": "Proyecta tu balance a fin de mes basado en transacciones recurrentes planificadas.",
         "heatmapDesc": "Resalta los días con mayor intensidad de gasto durante el mes.",
-        "chartsInfoTitle": "Información de Referencia de Gráficos"
+        "chartsInfoTitle": "Información de Referencia de Gráficos",
+        "dashboardLayout": "Organizar Dashboard",
+        "layoutBalance": "Balance Actual",
+        "layoutIncomeExpense": "Ingresos y Gastos Totales",
+        "layoutProjected": "Gastos Proyectados",
+        "layoutCharts": "Gráficos Analíticos",
+        "layoutSuggested": "Acciones Sugeridas",
+        "layoutBudgets": "Presupuestos Seguimiento"
     },
     "templates": {
         "manageTemplates": "Administrar Plantillas",
