@@ -232,6 +232,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
           />
           <Input
             ref={amountInputRef}
+            autoFocus
             value={amount}
             onChange={(e) => {
               const val = e.target.value.replace(',', '.');
