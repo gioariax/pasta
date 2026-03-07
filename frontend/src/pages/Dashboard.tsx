@@ -7,12 +7,15 @@ import { IconRenderer } from '../components/IconRenderer';
 import { DateSelector } from '../components/DateSelector';
 import { useDateStore } from '../store/dateStore';
 import { useTranslation } from 'react-i18next';
+import { TransactionModal } from '../components/TransactionModal';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
+  padding-bottom: calc(${({ theme }) => theme.spacing.xl} + 84px);
   
   @media (min-width: 768px) {
     padding: ${({ theme }) => theme.spacing.xl};
+    padding-bottom: ${({ theme }) => theme.spacing.xl};
   }
   
   max-width: 1200px;
@@ -50,34 +53,54 @@ const Button = styled.button<{ $primary?: boolean }>`
 
 const CardsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: ${({ theme }) => theme.spacing.lg};
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing.sm};
   margin-bottom: ${({ theme }) => theme.spacing.xl};
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: ${({ theme }) => theme.spacing.lg};
+  }
 `;
 
-const SummaryCard = styled.div`
+const SummaryCard = styled.div<{ $featured?: boolean }>`
   ${({ theme }) => theme.utils.glass}
   background: rgba(255, 255, 255, 0.03);
-  padding: ${({ theme }) => theme.spacing.lg};
+  padding: ${({ theme, $featured }) => $featured ? theme.spacing.lg : theme.spacing.md};
   border-radius: 16px;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
+  gap: ${({ theme, $featured }) => $featured ? theme.spacing.sm : theme.spacing.xs};
+  grid-column: ${({ $featured }) => $featured ? '1 / -1' : 'auto'};
+
+  @media (min-width: 768px) {
+    grid-column: auto;
+    padding: ${({ theme }) => theme.spacing.lg};
+    gap: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
-const CardLabel = styled.span`
+const CardLabel = styled.span<{ $featured?: boolean }>`
   color: ${({ theme }) => theme.colors.textSecondary};
-  font-size: 14px;
+  font-size: ${({ $featured }) => $featured ? '14px' : '12px'};
+
+  @media (min-width: 768px) {
+    font-size: 14px;
+  }
 `;
 
-const CardValue = styled.span<{ $type?: 'income' | 'expense' | 'projected' }>`
-  font-size: 32px;
+const CardValue = styled.span<{ $type?: 'income' | 'expense' | 'projected'; $featured?: boolean }>`
+  font-size: ${({ $featured }) => $featured ? '32px' : '20px'};
   font-weight: 600;
   color: ${({ theme, $type }) =>
     $type === 'income' ? theme.colors.success :
       $type === 'expense' ? theme.colors.danger :
         $type === 'projected' ? '#3b82f6' :
           theme.colors.textPrimary};
+
+  @media (min-width: 768px) {
+    font-size: 32px;
+  }
 `;
 
 const TransactionList = styled.div`
@@ -112,10 +135,117 @@ const TxSubtitle = styled.div`
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
+const SuggestedSubtitle = styled(TxSubtitle)`
+  @media (max-width: 767px) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+`;
+
 const TxAmount = styled.div<{ $type: 'income' | 'expense' }>`
   font-weight: 600;
   font-size: 16px;
   color: ${({ theme, $type }) => $type === 'income' ? theme.colors.success : theme.colors.textPrimary};
+`;
+
+const SuggestedTitle = styled(Title)`
+  font-size: 20px;
+  margin: 24px 0 12px;
+
+  @media (min-width: 768px) {
+    font-size: 24px;
+    margin: 32px 0 16px;
+  }
+`;
+
+const SuggestedItem = styled(TransactionItem)`
+  border-left: 4px solid #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+  gap: ${({ theme }) => theme.spacing.md};
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+    gap: ${({ theme }) => theme.spacing.xs};
+  }
+`;
+
+const SuggestedItemLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  min-width: 0;
+
+  @media (max-width: 767px) {
+    gap: ${({ theme }) => theme.spacing.sm};
+  }
+`;
+
+const SuggestedIconWrap = styled.div`
+  padding: 10px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 12px;
+  display: flex;
+
+  @media (max-width: 767px) {
+    padding: 8px;
+    border-radius: 10px;
+  }
+`;
+
+const SuggestedItemRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+
+  @media (max-width: 767px) {
+    justify-content: space-between;
+    width: 100%;
+    gap: ${({ theme }) => theme.spacing.sm};
+  }
+`;
+
+const SuggestedAcceptButton = styled(Button)`
+  @media (max-width: 767px) {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-height: 34px;
+    min-width: 116px;
+    text-align: center;
+  }
+`;
+
+const SuggestedAmount = styled(TxAmount)`
+  @media (max-width: 767px) {
+    font-size: 14px;
+  }
+`;
+
+const FloatingAddButton = styled(Button)`
+  position: fixed;
+  left: ${({ theme }) => theme.spacing.md};
+  right: ${({ theme }) => theme.spacing.md};
+  bottom: calc(${({ theme }) => theme.spacing.md} + env(safe-area-inset-bottom));
+  z-index: 900;
+  width: auto;
+  min-height: 48px;
+  border-radius: 12px;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+`;
+
+const FooterActions = styled.div`
+  margin-top: 32px;
+  text-align: center;
+
+  @media (max-width: 767px) {
+    display: none;
+  }
 `;
 
 const formatCurrency = (amount: number) => {
@@ -129,6 +259,7 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [acceptingTemplates, setAcceptingTemplates] = useState<Set<string>>(new Set());
+  const [isModalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     loadTransactions();
@@ -196,6 +327,19 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleOpenModalForCreate = () => {
+    setModalOpen(true);
+  };
+
+  const handleSaveTransaction = async (data: Transaction) => {
+    try {
+      await createTransaction(data);
+      await loadTransactions();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const income = currentMonthTransactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
   const expense = currentMonthTransactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const balance = income - expense;
@@ -210,9 +354,9 @@ const Dashboard: React.FC = () => {
       <DateSelector />
 
       <CardsGrid>
-        <SummaryCard>
-          <CardLabel>{t('dashboard.currentBalance')}</CardLabel>
-          <CardValue>{formatCurrency(balance)}</CardValue>
+        <SummaryCard $featured>
+          <CardLabel $featured>{t('dashboard.currentBalance')}</CardLabel>
+          <CardValue $featured>{formatCurrency(balance)}</CardValue>
         </SummaryCard>
         <SummaryCard>
           <CardLabel>{t('dashboard.totalIncome')}</CardLabel>
@@ -232,47 +376,58 @@ const Dashboard: React.FC = () => {
 
       {suggestedTemplates.length > 0 && (
         <>
-          <Title style={{ fontSize: '24px', margin: '32px 0 16px' }}>{t('dashboard.suggestedActions')}</Title>
+          <SuggestedTitle>{t('dashboard.suggestedActions')}</SuggestedTitle>
           <TransactionList>
             {suggestedTemplates.map((template, idx) => {
               const catDef = categories.find(c => c.name === template.category);
               return (
-                <TransactionItem key={template.transactionId || idx} style={{ borderLeft: '4px solid #3b82f6', background: 'rgba(59, 130, 246, 0.05)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ padding: '10px', background: 'rgba(59,130,246,0.1)', borderRadius: '12px', display: 'flex' }}>
+                <SuggestedItem key={template.transactionId || idx}>
+                  <SuggestedItemLeft>
+                    <SuggestedIconWrap>
                       <IconRenderer name={catDef?.icon || 'FiHelpCircle'} color="#3b82f6" />
-                    </div>
+                    </SuggestedIconWrap>
                     <TxLeft>
                       <TxTitle>{template.description || template.category}</TxTitle>
-                      <TxSubtitle>
+                      <SuggestedSubtitle>
                         {template.description ? template.category : ''} {template.description ? '• ' : ''}
                         {template.recurrenceInterval === 1 ? t('templates.intervalMonthly') : t('templates.intervalMonths', { count: template.recurrenceInterval })}
-                      </TxSubtitle>
+                      </SuggestedSubtitle>
                     </TxLeft>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <TxAmount $type={template.type}>
+                  </SuggestedItemLeft>
+                  <SuggestedItemRight>
+                    <SuggestedAmount $type={template.type}>
                       {template.type === 'income' ? '+' : '-'}{formatCurrency(template.amount)}
-                    </TxAmount>
-                    <Button
+                    </SuggestedAmount>
+                    <SuggestedAcceptButton
                       $primary
                       disabled={acceptingTemplates.has(template.transactionId!)}
                       style={{ opacity: acceptingTemplates.has(template.transactionId!) ? 0.5 : 1, cursor: acceptingTemplates.has(template.transactionId!) ? 'not-allowed' : 'pointer' }}
                       onClick={(e) => { e.stopPropagation(); handleAcceptSuggestion(template); }}
                     >
                       {acceptingTemplates.has(template.transactionId!) ? t('common.accepting') : t('common.accept')}
-                    </Button>
-                  </div>
-                </TransactionItem>
+                    </SuggestedAcceptButton>
+                  </SuggestedItemRight>
+                </SuggestedItem>
               );
             })}
           </TransactionList>
         </>
       )}
 
-      <div style={{ marginTop: '32px', textAlign: 'center' }}>
+      <FooterActions>
         <Button $primary onClick={() => navigate('/transactions')}>{t('dashboard.viewAllTransactions')}</Button>
-      </div>
+      </FooterActions>
+
+      <FloatingAddButton $primary onClick={handleOpenModalForCreate}>
+        {t('transactions.addTransaction')}
+      </FloatingAddButton>
+
+      <TransactionModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleSaveTransaction}
+        presentation="bottom-sheet"
+      />
 
     </Container>
   );

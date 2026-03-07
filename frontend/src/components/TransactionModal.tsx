@@ -5,13 +5,16 @@ import { SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem }
 import { SegmentedControl } from './ui/segmented-control';
 import { Switch } from './ui/switch';
 import { DatePickerRoot, DatePickerControl, DatePickerInput } from './ui/date-picker';
+import { formatDateAsDdSlashMMSlashYyyy, parseDdSlashMMSlashYyyyToDateValue } from '../lib/date';
+import type { Transaction } from '../services/api';
 
 interface TransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (transaction: any) => void;
+  onSubmit: (transaction: Transaction) => void | Promise<void>;
   onDelete?: (id: string) => void;
-  initialData?: any;
+  initialData?: Transaction;
+  presentation?: 'center' | 'bottom-sheet';
 }
 
 import { useSettings } from '../contexts/SettingsContext';
@@ -24,7 +27,7 @@ const recurrenceCollection = createListCollection({
   ]
 });
 
-const Overlay = styled.div`
+const Overlay = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
   position: fixed;
   top: 0;
   left: 0;
@@ -36,9 +39,14 @@ const Overlay = styled.div`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+
+  @media (max-width: 767px) {
+    align-items: ${({ $presentation }) => $presentation === 'bottom-sheet' ? 'flex-end' : 'center'};
+    padding: ${({ theme, $presentation }) => $presentation === 'bottom-sheet' ? '0' : theme.spacing.md};
+  }
 `;
 
-const ModalContent = styled.div`
+const ModalContent = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
   ${({ theme }) => theme.utils.glass}
   background: ${({ theme }) => theme.colors.surface};
   padding: ${({ theme }) => theme.spacing.xl};
@@ -48,6 +56,17 @@ const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.lg};
+
+  @media (max-width: 767px) {
+    ${({ $presentation, theme }) => $presentation === 'bottom-sheet' ? `
+      max-width: none;
+      width: 100vw;
+      height: 90vh;
+      border-radius: 16px 16px 0 0;
+      padding: ${theme.spacing.lg};
+      overflow-y: auto;
+    ` : ''}
+  }
 `;
 
 const Title = styled.h2`
@@ -96,7 +115,7 @@ const DeleteButton = styled(Button)`
   }
 `;
 
-export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, initialData, onSubmit, onDelete }) => {
+export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, initialData, onSubmit, onDelete, presentation = 'center' }) => {
   const { categories: allCategories } = useSettings();
   const [type, setType] = useState<'income' | 'expense'>('expense');
 
@@ -132,7 +151,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
       setIsRecurring(false);
       setRecurrenceInterval(1);
     }
-  }, [isOpen, initialData]);
+  }, [allCategories, isOpen, initialData]);
 
   // Update category automatically if type changes
   React.useEffect(() => {
@@ -141,7 +160,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
         setCategory(currentCategories[0]);
       }
     }
-  }, [type, initialData, currentCategories]);
+  }, [type, initialData, currentCategories, category]);
 
   if (!isOpen) return null;
 
@@ -167,8 +186,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <Overlay>
-      <ModalContent>
+    <Overlay $presentation={presentation}>
+      <ModalContent $presentation={presentation}>
         <Title>{initialData ? 'Edit Transaction' : 'Add Transaction'}</Title>
         <Form onSubmit={handleSubmit}>
           <SegmentedControl
@@ -227,11 +246,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
           <DatePickerRoot
             value={date ? [parseDate(date)] : []}
             onValueChange={(e) => setDate(e.value[0]?.toString() ?? new Date().toISOString().split('T')[0])}
+            format={(selectedDate) => formatDateAsDdSlashMMSlashYyyy(selectedDate.toDate('UTC'))}
+            parse={(value) => parseDdSlashMMSlashYyyyToDateValue(value)}
+            placeholder="dd/MM/yyyy"
             width="full"
             variant="subtle"
           >
             <DatePickerControl>
-              <DatePickerInput placeholder="Select date" />
+              <DatePickerInput placeholder="dd/MM/yyyy" />
             </DatePickerControl>
           </DatePickerRoot>
 
@@ -268,7 +290,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
           <Row>
             {initialData && initialData.transactionId && onDelete && (
               <DeleteButton type="button" onClick={() => {
-                onDelete(initialData.transactionId);
+                const transactionId = initialData.transactionId;
+                if (!transactionId) return;
+                onDelete(transactionId);
                 onClose();
               }}>
                 Delete

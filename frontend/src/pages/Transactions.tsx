@@ -7,6 +7,7 @@ import { IconRenderer } from '../components/IconRenderer';
 import { DateSelector } from '../components/DateSelector';
 import { useDateStore } from '../store/dateStore';
 import { useTranslation } from 'react-i18next';
+import { formatDateAsDdSlashMMSlashYyyy } from '../lib/date';
 import {
   SwipeableList,
   SwipeableListItem,
@@ -283,7 +284,7 @@ const Transactions: React.FC = () => {
                         </TxIconContainer>
                         <TxLeft>
                           <TxTitle>{tx.description || tx.category}</TxTitle>
-                          <TxSubtitle>{tx.description ? tx.category : new Date(tx.date).toLocaleDateString()}</TxSubtitle>
+                          <TxSubtitle>{tx.description ? tx.category : formatDateAsDdSlashMMSlashYyyy(tx.date)}</TxSubtitle>
                         </TxLeft>
                       </TxLeftContent>
                       <TxAmount $type={tx.type}>
