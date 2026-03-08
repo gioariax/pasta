@@ -27,13 +27,6 @@ const Container = styled.div`
   margin: 0 auto;
 `;
 
-const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
-`;
-
 const Title = styled.h1`
   font-size: 32px;
   font-weight: 700;
@@ -434,7 +427,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <Container>
-      <Header />
 
       <DateSelector />
 

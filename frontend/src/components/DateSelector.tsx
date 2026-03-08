@@ -15,7 +15,6 @@ const HeaderRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing.lg};
-  margin-bottom: ${({ theme }) => theme.spacing.md};
 `;
 
 const NavButton = styled.button`
@@ -71,6 +70,7 @@ const FilterContainer = styled.div`
   background: rgba(255, 255, 255, 0.02);
   border-radius: 12px;
   align-items: center;
+  margin-top: ${({ theme }) => theme.spacing.md};
 `;
 
 export const DateSelector: React.FC = () => {

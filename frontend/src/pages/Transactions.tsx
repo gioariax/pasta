@@ -271,8 +271,6 @@ const Transactions: React.FC = () => {
 
   return (
     <Container>
-      <Header />
-
       <DateSelector />
 
       <AddButtonContainer>
