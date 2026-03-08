@@ -22,6 +22,10 @@ dist-ssr/
 # AWS SAM
 .aws-sam/
 packaged-template.yaml
+packaged.yaml
+packaged-*.yaml
+backend/dist/
+frontend/dist/
 
 # OS Files
 .DS_Store

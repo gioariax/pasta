@@ -30,7 +30,10 @@ const recurrenceCollection = createListCollection({
 
 const Overlay = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
@@ -66,12 +69,13 @@ const ModalContent = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
 
   @media (max-width: 767px) {
     ${({ $presentation, theme }) => $presentation === 'bottom-sheet' ? css`
-      position: absolute;
-      top: 10%;
+      position: fixed;
+      top: 10vh;
       left: 0;
-      width: 100%;
-      height: 90%;
-      max-width: none;
+      width: 100vw;
+      height: 90vh;
+      max-width: 100vw;
+      margin: 0;
       border-radius: 16px 16px 0 0;
       padding: ${theme.spacing.lg};
       overflow-y: auto;

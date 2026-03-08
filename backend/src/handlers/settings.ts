@@ -55,17 +55,19 @@ export const updateSettings = async (event: APIGatewayProxyEvent): Promise<APIGa
             return createResponse(400, { error: 'Missing body' });
         }
 
-        const { categories } = JSON.parse(event.body);
+        const { categories, dashboardWidgets, dashboardLayout } = JSON.parse(event.body);
 
         await docClient.send(new PutCommand({
             TableName: TABLE_NAME,
             Item: {
                 userId,
-                categories: categories || []
+                categories: categories || [],
+                dashboardWidgets: dashboardWidgets || undefined,
+                dashboardLayout: dashboardLayout || undefined
             }
         }));
 
-        return createResponse(200, { message: 'Settings updated successfully', categories });
+        return createResponse(200, { message: 'Settings updated successfully', categories, dashboardWidgets, dashboardLayout });
     } catch (error) {
         console.error('Error updating settings:', error);
         return createResponse(500, { error: 'Internal Server Error' });
