@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp, FiPieChart, FiInfo, FiMenu } from 'react-icons/fi';
+import { FiRepeat, FiGrid, FiGlobe, FiLogOut, FiChevronDown, FiChevronUp, FiInfo, FiMenu } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import Templates from './Templates';
@@ -131,23 +131,37 @@ const langCollection = createListCollection({
 interface SortableItemProps {
     id: string;
     label: string;
+    isActive: boolean;
+    onToggle: (id: string, checked: boolean) => void;
 }
 
 const SortableItemContainer = styled.div`
     display: flex;
     align-items: center;
-    gap: ${({ theme }) => theme.spacing.md};
+    justify-content: space-between;
     padding: ${({ theme }) => theme.spacing.md};
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
     margin-bottom: ${({ theme }) => theme.spacing.xs};
+`;
+
+const DragHandle = styled.div`
     cursor: grab;
     touch-action: none;
+    display: flex;
+    align-items: center;
+    padding-right: ${({ theme }) => theme.spacing.sm};
     
     &:active {
         cursor: grabbing;
     }
+`;
+
+const SortableItemInfo = styled.div`
+    display: flex;
+    align-items: center;
+    gap: ${({ theme }) => theme.spacing.md};
+    flex: 1;
 `;
 
 const SortableItem: React.FC<SortableItemProps> = (props) => {
@@ -165,9 +179,19 @@ const SortableItem: React.FC<SortableItemProps> = (props) => {
     };
 
     return (
-        <SortableItemContainer ref={setNodeRef} style={style} {...attributes} {...listeners}>
-            <FiMenu color="#9ca3af" />
-            <span style={{ color: 'white', fontWeight: 500 }}>{props.label}</span>
+        <SortableItemContainer ref={setNodeRef} style={style}>
+            <SortableItemInfo>
+                <DragHandle {...attributes} {...listeners}>
+                    <FiMenu color="#9ca3af" />
+                </DragHandle>
+                <span style={{ color: 'white', fontWeight: 500 }}>{props.label}</span>
+            </SortableItemInfo>
+            <div style={{ display: 'flex', alignItems: 'center' }} onPointerDown={(e) => e.stopPropagation()}>
+                <Switch
+                    checked={props.isActive}
+                    onCheckedChange={(details) => props.onToggle(props.id, details.checked)}
+                />
+            </div>
         </SortableItemContainer>
     );
 };
@@ -181,6 +205,10 @@ const Settings: React.FC = () => {
 
     const toggleSection = (section: 'categories' | 'recurring' | 'widgets' | 'layout') => {
         setOpenSection(prev => prev === section ? null : section);
+    };
+
+    const toggleWidget = (widgetId: string, value: boolean) => {
+        saveWidgets({ ...dashboardWidgets, [widgetId]: value });
     };
 
     const changeLanguage = (lng: string) => {
@@ -209,7 +237,11 @@ const Settings: React.FC = () => {
             case 'balance': return t('settings.layoutBalance');
             case 'incomeExpense': return t('settings.layoutIncomeExpense');
             case 'projected': return t('settings.layoutProjected');
-            case 'charts': return t('settings.layoutCharts');
+            case 'expenseDistribution': return t('settings.expenseDistribution');
+            case 'incomeVsExpense': return t('settings.incomeVsExpense');
+            case 'burnRate': return t('settings.burnRate');
+            case 'cashFlow': return t('settings.cashFlow');
+            case 'heatmap': return t('settings.heatmap');
             case 'suggested': return t('settings.layoutSuggested');
             case 'budgets': return t('settings.layoutBudgets');
             default: return key;
@@ -283,9 +315,9 @@ const Settings: React.FC = () => {
                     </CollapsibleInner>
                 </CollapsibleContent>
 
-                <SectionButton onClick={() => toggleSection('widgets')} style={{ position: 'relative' }}>
+                <SectionButton onClick={() => toggleSection('layout')} style={{ position: 'relative' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <FiPieChart /> {t('settings.dashboardWidgets', 'Dashboard Analytical Charts')}
+                        <FiGrid /> {t('settings.dashboardOverview', 'Overview')}
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <button
@@ -298,59 +330,12 @@ const Settings: React.FC = () => {
                         >
                             <FiInfo size={20} />
                         </button>
-                        {openSection === 'widgets' ? <FiChevronUp /> : <FiChevronDown />}
+                        {openSection === 'layout' ? <FiChevronUp /> : <FiChevronDown />}
                     </div>
-                </SectionButton>
-                <CollapsibleContent $isOpen={openSection === 'widgets'}>
-                    <CollapsibleInner>
-                        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '12px' }}>
-                            <Switch
-                                checked={dashboardWidgets.expenseDistribution}
-                                onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, expenseDistribution: e.checked })}
-                            >
-                                {t('settings.expenseDistribution', 'Expense Distribution (Donut Chart)')}
-                            </Switch>
-
-                            <Switch
-                                checked={dashboardWidgets.incomeVsExpense}
-                                onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, incomeVsExpense: e.checked })}
-                            >
-                                {t('settings.incomeVsExpense', 'Income vs Expense Trends')}
-                            </Switch>
-
-                            <Switch
-                                checked={dashboardWidgets.burnRate}
-                                onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, burnRate: e.checked })}
-                            >
-                                {t('settings.burnRate', 'Burn Rate vs Budget Constraints')}
-                            </Switch>
-
-                            <Switch
-                                checked={dashboardWidgets.cashFlow}
-                                onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, cashFlow: e.checked })}
-                            >
-                                {t('settings.cashFlow', 'Projected Cash Flow')}
-                            </Switch>
-
-                            <Switch
-                                checked={dashboardWidgets.heatmap}
-                                onCheckedChange={(e) => saveWidgets({ ...dashboardWidgets, heatmap: e.checked })}
-                            >
-                                {t('settings.heatmap', 'Expenditure Intensity Heatmap')}
-                            </Switch>
-                        </div>
-                    </CollapsibleInner>
-                </CollapsibleContent>
-
-                <SectionButton onClick={() => toggleSection('layout')}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <FiGrid /> {t('settings.dashboardLayout', 'Dashboard Layout')}
-                    </span>
-                    {openSection === 'layout' ? <FiChevronUp /> : <FiChevronDown />}
                 </SectionButton>
                 <CollapsibleContent $isOpen={openSection === 'layout'}>
                     <CollapsibleInner>
-                        <div style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '12px' }}>
+                        <div style={{ paddingTop: '8px', paddingBottom: '24px' }}>
                             <DndContext
                                 sensors={sensors}
                                 collisionDetection={closestCenter}
@@ -361,7 +346,13 @@ const Settings: React.FC = () => {
                                     strategy={verticalListSortingStrategy}
                                 >
                                     {dashboardLayout.map((id) => (
-                                        <SortableItem key={id} id={id} label={getLayoutLabel(id)} />
+                                        <SortableItem
+                                            key={id}
+                                            id={id}
+                                            label={getLayoutLabel(id)}
+                                            isActive={dashboardWidgets[id] !== false}
+                                            onToggle={toggleWidget}
+                                        />
                                     ))}
                                 </SortableContext>
                             </DndContext>

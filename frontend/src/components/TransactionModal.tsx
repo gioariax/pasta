@@ -30,10 +30,7 @@ const recurrenceCollection = createListCollection({
 
 const Overlay = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
@@ -42,7 +39,7 @@ const Overlay = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
   z-index: 1000;
 
   @media (max-width: 767px) {
-    align-items: ${({ $presentation }) => $presentation === 'bottom-sheet' ? 'flex-end' : 'center'};
+    align-items: ${({ $presentation }) => $presentation === 'bottom-sheet' ? 'initial' : 'center'};
     padding: ${({ theme, $presentation }) => $presentation === 'bottom-sheet' ? '0' : theme.spacing.md};
   }
 `;
@@ -69,12 +66,16 @@ const ModalContent = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
 
   @media (max-width: 767px) {
     ${({ $presentation, theme }) => $presentation === 'bottom-sheet' ? css`
+      position: absolute;
+      top: 10%;
+      left: 0;
+      width: 100%;
+      height: 90%;
       max-width: none;
-      width: 100vw;
-      height: 90vh;
       border-radius: 16px 16px 0 0;
       padding: ${theme.spacing.lg};
       overflow-y: auto;
+      overscroll-behavior: contain;
       animation: ${slideUp} 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     ` : css`
       animation: ${slideUp} 0.2s ease-out forwards;

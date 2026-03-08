@@ -143,16 +143,7 @@ const BudgetGrid = styled.div`
   }
 `;
 
-const ChartsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: ${({ theme }) => theme.spacing.lg};
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
 
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-`;
 
 const BudgetCard = styled(SummaryCard)`
   gap: ${({ theme }) => theme.spacing.sm};
@@ -454,6 +445,9 @@ const Dashboard: React.FC = () => {
       </AddButtonContainer>
 
       {dashboardLayout && dashboardLayout.map((blockKey) => {
+        // Ensure widget is toggled ON before rendering (default: true if not explicitly false)
+        if (dashboardWidgets && dashboardWidgets[blockKey] === false) return null;
+
         switch (blockKey) {
           case 'balance':
             return (
@@ -487,26 +481,35 @@ const Dashboard: React.FC = () => {
                 </SummaryCard>
               </CardsGrid>
             );
-          case 'charts':
-            if (!dashboardWidgets) return null;
+          case 'expenseDistribution':
             return (
-              <ChartsGrid key={blockKey}>
-                {dashboardWidgets.expenseDistribution && (
-                  <ExpenseDistributionChart transactions={currentMonthTransactions} />
-                )}
-                {dashboardWidgets.incomeVsExpense && (
-                  <IncomeVsExpenseTrend transactions={transactions} />
-                )}
-                {dashboardWidgets.burnRate && (
-                  <BurnRateChart transactions={currentMonthTransactions} categories={categories} />
-                )}
-                {dashboardWidgets.cashFlow && (
-                  <ProjectedCashflowChart transactions={currentMonthTransactions} suggestedTemplates={suggestedTemplates} />
-                )}
-                {dashboardWidgets.heatmap && (
-                  <ExpenseHeatmapChart transactions={currentMonthTransactions} />
-                )}
-              </ChartsGrid>
+              <div key={blockKey} style={{ marginBottom: '24px' }}>
+                <ExpenseDistributionChart transactions={currentMonthTransactions} />
+              </div>
+            );
+          case 'incomeVsExpense':
+            return (
+              <div key={blockKey} style={{ marginBottom: '24px' }}>
+                <IncomeVsExpenseTrend transactions={transactions} />
+              </div>
+            );
+          case 'burnRate':
+            return (
+              <div key={blockKey} style={{ marginBottom: '24px' }}>
+                <BurnRateChart transactions={currentMonthTransactions} categories={categories} />
+              </div>
+            );
+          case 'cashFlow':
+            return (
+              <div key={blockKey} style={{ marginBottom: '24px' }}>
+                <ProjectedCashflowChart transactions={currentMonthTransactions} suggestedTemplates={suggestedTemplates} />
+              </div>
+            );
+          case 'heatmap':
+            return (
+              <div key={blockKey} style={{ marginBottom: '24px' }}>
+                <ExpenseHeatmapChart transactions={currentMonthTransactions} />
+              </div>
             );
           case 'budgets':
             if (budgetsData.length === 0) return null;

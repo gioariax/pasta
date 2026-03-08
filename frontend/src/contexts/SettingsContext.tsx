@@ -19,6 +19,11 @@ export const DEFAULT_CATEGORIES: Category[] = [
 ];
 
 const DEFAULT_WIDGETS: Record<string, boolean> = {
+    balance: true,
+    incomeExpense: true,
+    projected: true,
+    suggested: true,
+    budgets: true,
     expenseDistribution: true,
     incomeVsExpense: true,
     burnRate: true,
@@ -30,7 +35,11 @@ export const DEFAULT_LAYOUT: string[] = [
     'balance',
     'incomeExpense',
     'projected',
-    'charts',
+    'expenseDistribution',
+    'incomeVsExpense',
+    'burnRate',
+    'cashFlow',
+    'heatmap',
     'suggested',
     'budgets'
 ];
@@ -77,7 +86,18 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 setDashboardWidgets(DEFAULT_WIDGETS);
             }
             if (data.dashboardLayout && data.dashboardLayout.length > 0) {
-                setDashboardLayout(data.dashboardLayout);
+                // Migration: Replace 'charts' string with the 5 discrete chart components gracefully
+                let finalLayout: string[] = [];
+                for (const item of data.dashboardLayout) {
+                    if (item === 'charts') {
+                        finalLayout.push('expenseDistribution', 'incomeVsExpense', 'burnRate', 'cashFlow', 'heatmap');
+                    } else {
+                        finalLayout.push(item);
+                    }
+                }
+                // Deduplicate just in case
+                finalLayout = Array.from(new Set(finalLayout));
+                setDashboardLayout(finalLayout);
             } else {
                 setDashboardLayout(DEFAULT_LAYOUT);
             }
