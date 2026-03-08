@@ -28,12 +28,6 @@ const Container = styled.div`
   margin: 0 auto;
 `;
 
-const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
-`;
 
 
 const Button = styled.button<{ $primary?: boolean }>`
@@ -78,7 +72,7 @@ const TransactionItem = styled.div<{ $isLast?: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${({ theme }) => theme.spacing.md} 0;
+  padding: 20px 0;
   border-bottom: ${({ $isLast }) => ($isLast ? 'none' : '1px solid rgba(255, 255, 255, 0.05)')};
   transition: background 0.2s;
   cursor: pointer;
@@ -141,7 +135,6 @@ const DayGroupHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: ${({ theme }) => theme.spacing.md};
   padding-bottom: ${({ theme }) => theme.spacing.sm};
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 `;
