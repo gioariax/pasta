@@ -34,6 +34,9 @@ const Overlay = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
   left: 0;
   width: 100vw;
   height: 100vh;
+  @supports (height: 100dvh) {
+    height: 100dvh;
+  }
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
@@ -69,12 +72,12 @@ const ModalContent = styled.div<{ $presentation: 'center' | 'bottom-sheet' }>`
 
   @media (max-width: 767px) {
     ${({ $presentation, theme }) => $presentation === 'bottom-sheet' ? css`
-      position: fixed;
-      top: 10vh;
+      position: absolute;
+      top: 10%;
       left: 0;
-      width: 100vw;
-      height: 90vh;
-      max-width: 100vw;
+      width: 100%;
+      height: 90%;
+      max-width: none;
       margin: 0;
       border-radius: 16px 16px 0 0;
       padding: ${theme.spacing.lg};
@@ -184,18 +187,28 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
     }
   }, [type, initialData, currentCategories, category]);
 
-  // Handle auto-focus when modal opens
+  // Handle auto-focus and prevent body scroll when modal opens
   useEffect(() => {
     if (isOpen) {
-      // AutoFocus naturally brings up the keyboard, but browsers may over-scroll the view inside the modal.
-      // We reset the scroll to the top of the modal content after the animation to ensure the Value/Category fields are visible.
-      const timer = setTimeout(() => {
-        if (modalContentRef.current) {
-          modalContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }, 350);
-      return () => clearTimeout(timer);
+      document.body.style.overflow = 'hidden';
+
+      // Focus the input programmatically with preventScroll to avoid iOS 
+      // from completely shifting the viewport during the slide animation
+      if (amountInputRef.current) {
+        amountInputRef.current.focus({ preventScroll: true });
+      }
+
+      // Reset scroll of the modal content if it kept previous state
+      if (modalContentRef.current) {
+        modalContentRef.current.scrollTop = 0;
+      }
+    } else {
+      document.body.style.overflow = '';
     }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -241,7 +254,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
           />
           <Input
             ref={amountInputRef}
-            autoFocus
             value={amount}
             onChange={(e) => {
               const val = e.target.value.replace(',', '.');
