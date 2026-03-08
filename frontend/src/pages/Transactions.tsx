@@ -65,15 +65,14 @@ const AddTransactionButton = styled(Button)`
 const TransactionList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xl};
+  gap: ${({ theme }) => theme.spacing.md};
 `;
 
 const TransactionItem = styled.div<{ $isLast?: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 0;
-  border-bottom: ${({ $isLast }) => ($isLast ? 'none' : '1px solid rgba(255, 255, 255, 0.05)')};
+  padding-top: 20px;
   transition: background 0.2s;
   cursor: pointer;
 
