@@ -180,6 +180,7 @@ const Templates: React.FC<TemplatesProps> = ({ hideHeader }) => {
         onClose={() => setModalOpen(false)}
         onSubmit={handleSaveTemplate}
         onDelete={handleDeleteTemplate}
+        presentation="bottom-sheet"
       />
     </Container>
   );
